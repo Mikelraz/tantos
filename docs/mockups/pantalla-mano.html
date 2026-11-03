@@ -1,0 +1,97 @@
+<style>
+  .phone{width:300px;margin:0 auto;border:2px solid #888;border-radius:24px;padding:14px 12px;background:#0f3d2e;color:#f3f3f3;font-family:system-ui,sans-serif;font-size:13px}
+  .top{display:flex;justify-content:space-between;font-size:12px;opacity:.85;margin-bottom:8px}
+  .c{display:inline-block;width:24px;height:34px;line-height:34px;text-align:center;background:#fdfaf2;color:#222;border-radius:4px;margin:1px;font-weight:700;font-size:13px}
+  .hand{display:flex;flex-direction:column;align-items:center;font-size:11px}
+  .tag{font-size:10px;padding:1px 5px;border-radius:6px;margin-top:2px}
+  .a{background:#2f6fd6}.b{background:#c8442f}
+  .mano{outline:2px solid #f2c94c;border-radius:6px;padding:2px}
+  .table{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:center;justify-items:center;margin-bottom:10px}
+  .lances{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0 10px}
+  .lances td{padding:3px 4px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .lances td:first-child{font-weight:600;width:52px}
+  .inputs{display:flex;gap:8px}
+  .inp{flex:1;border-radius:10px;padding:6px;text-align:center}
+  .inp div:last-child{font-size:22px;font-weight:700;background:rgba(255,255,255,.15);border-radius:6px;margin-top:3px;padding:4px}
+  .btn{margin-top:10px;background:#f2c94c;color:#222;text-align:center;border-radius:10px;padding:10px;font-weight:700}
+  .row{display:flex;align-items:center;gap:6px;padding:4px 0}
+  .row .lbl{width:58px;font-size:11px}
+  .pair{border-radius:10px;padding:6px;margin-bottom:8px}
+  .pairA{background:rgba(47,111,214,.25);border:1px solid #2f6fd6}
+  .pairB{background:rgba(200,68,47,.25);border:1px solid #c8442f}
+  .chip{display:inline-block;background:rgba(255,255,255,.12);border-radius:8px;padding:3px 7px;margin:2px;font-size:11px}
+  .note{font-size:12px;color:#666;margin-top:8px;text-align:center}
+</style>
+
+<h2>¿Cómo quieres ver la mano?</h2>
+<p class="subtitle">La misma mano en los dos bocetos. Tú decides quién gana cada lance mirando las cartas, y tecleas los tantos de cada pareja. (Solución de este ejemplo: Nosotros 4, Ellos 6.)</p>
+
+<div class="cards">
+  <div class="card" data-choice="mesa" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#eee">
+      <div class="phone">
+        <div class="top"><span>Mano 3 / 10</span><span>⏱ 0:07</span></div>
+        <div class="table">
+          <div></div>
+          <div class="hand"><div><span class="c">7</span><span class="c">7</span><span class="c">S</span><span class="c">4</span></div><span class="tag a">Compañero</span></div>
+          <div></div>
+          <div class="hand"><div><span class="c">R</span><span class="c">C</span><span class="c">S</span><span class="c">1</span></div><span class="tag b">Rival</span></div>
+          <div style="font-size:11px;opacity:.6">mesa</div>
+          <div class="hand"><div><span class="c">C</span><span class="c">S</span><span class="c">4</span><span class="c">1</span></div><span class="tag b">Rival</span></div>
+          <div></div>
+          <div class="hand mano"><div><span class="c">R</span><span class="c">R</span><span class="c">7</span><span class="c">5</span></div><span class="tag a">Tú · mano</span></div>
+          <div></div>
+        </div>
+        <table class="lances">
+          <tr><td>Grande</td><td>Nosotros envidan 2 · quieren</td></tr>
+          <tr><td>Chica</td><td>Ellos envidan 2 · no quiero</td></tr>
+          <tr><td>Pares</td><td>Sin envite</td></tr>
+          <tr><td>Juego</td><td>Nosotros envidan 2 · quieren</td></tr>
+        </table>
+        <div class="inputs">
+          <div class="inp a"><div>Nosotros</div><div>_</div></div>
+          <div class="inp b"><div>Ellos</div><div>_</div></div>
+        </div>
+        <div class="btn">Comprobar</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · Mesa</h3>
+      <p>Las cuatro manos sentadas como en la mesa real. Más fiel a la partida, pero para contar los tantos tienes que juntar mentalmente las manos de cada pareja, que están en lados opuestos.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="parejas" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#eee">
+      <div class="phone">
+        <div class="top"><span>Mano 3 / 10</span><span>⏱ 0:07</span></div>
+        <div class="pair pairA">
+          <div style="font-weight:700;font-size:12px">Nosotros</div>
+          <div class="row"><span class="lbl">Tú · mano</span><span class="c">R</span><span class="c">R</span><span class="c">7</span><span class="c">5</span></div>
+          <div class="row"><span class="lbl">Compañero</span><span class="c">7</span><span class="c">7</span><span class="c">S</span><span class="c">4</span></div>
+        </div>
+        <div class="pair pairB">
+          <div style="font-weight:700;font-size:12px">Ellos</div>
+          <div class="row"><span class="lbl">Rival 1</span><span class="c">C</span><span class="c">S</span><span class="c">4</span><span class="c">1</span></div>
+          <div class="row"><span class="lbl">Rival 2</span><span class="c">R</span><span class="c">C</span><span class="c">S</span><span class="c">1</span></div>
+        </div>
+        <div>
+          <span class="chip">Grande: N 2 · quiero</span>
+          <span class="chip">Chica: E 2 · no quiero</span>
+          <span class="chip">Pares: sin envite</span>
+          <span class="chip">Juego: N 2 · quiero</span>
+        </div>
+        <div class="inputs" style="margin-top:10px">
+          <div class="inp a"><div>Nosotros</div><div>_</div></div>
+          <div class="inp b"><div>Ellos</div><div>_</div></div>
+        </div>
+        <div class="btn">Comprobar</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · Por parejas</h3>
+      <p>Las dos manos de cada pareja juntas en su recuadro de color. Se lee más rápido en el móvil y casa con cómo se cuentan los tantos, pero se parece menos a lo que ves en la mesa.</p>
+    </div>
+  </div>
+</div>
+<p class="note">El orden de juego (quién es mano) se marca en ambos, porque decide los empates.</p>
