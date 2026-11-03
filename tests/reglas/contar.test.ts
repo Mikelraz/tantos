@@ -196,4 +196,55 @@ describe('contarMano', () => {
     expect(j?.tantos).toEqual([5, 0]);
     expect(j?.puestosTantos).toEqual([0, 2]);
   });
+
+  it('pares en paso con las dos parejas: sin piedras, solo los tantos del ganador', () => {
+    const jugadas: Jugadas = [
+      jugada('4 4 7 1'),
+      jugada('R R 5 5'),
+      jugada('5 5 5 1'),
+      jugada('3 2 1 7'),
+    ];
+    const d = contarMano({
+      jugadas,
+      mano: 0,
+      lances: [
+        todosPasan('grande'),
+        todosPasan('chica'),
+        l('pares', paso(0), paso(1), paso(2)),
+        todosPasan('punto'),
+      ],
+    });
+    const p = d.lances[2];
+    expect(p?.resultado.resolucion).toBe('en_paso');
+    expect(p?.ganador).toBe(1);
+    expect(p?.puestoGanador).toBe(1);
+    expect(p?.apuesta).toEqual([0, 0]);
+    expect(p?.tantos).toEqual([0, 3]);
+    expect(p?.puestosTantos).toEqual([1]);
+  });
+
+  it('juego en paso con las dos parejas: sin piedras, solo los tantos del ganador', () => {
+    const jugadas: Jugadas = [
+      jugada('R R S 1'),
+      jugada('C C 7 6'),
+      jugada('R R C S'),
+      jugada('5 3 2 1'),
+    ];
+    const d = contarMano({
+      jugadas,
+      mano: 0,
+      lances: [
+        todosPasan('grande'),
+        todosPasan('chica'),
+        l('pares', paso(0), paso(1), paso(2)),
+        l('juego', paso(0), paso(1), paso(2)),
+      ],
+    });
+    const j = d.lances[3];
+    expect(j?.resultado.resolucion).toBe('en_paso');
+    expect(j?.ganador).toBe(0);
+    expect(j?.apuesta).toEqual([0, 0]);
+    expect(j?.tantos).toEqual([5, 0]);
+    expect(j?.puestosTantos).toEqual([0, 2]);
+  });
 });
