@@ -67,9 +67,18 @@ describe('equivalencia con el motor de ordago', () => {
       if (JSON.stringify(esperados) !== JSON.stringify(c.lances.map((l) => l.lance))) {
         fallos.push(`caso ${i}: lances ${esperados} != ${c.lances.map((l) => l.lance)}`);
       }
+      if (d.lances.length !== c.lances.length) {
+        fallos.push(`caso ${i}: ${d.lances.length} lances contados, esperados ${c.lances.length}`);
+      }
       c.lances.forEach((l, k) => {
         const got = d.lances[k];
-        if (got === undefined) return;
+        if (got === undefined) {
+          fallos.push(`caso ${i} ${l.lance}: contarMano no devolvió el lance ${k}`);
+          return;
+        }
+        if (got.lance !== l.lance) {
+          fallos.push(`caso ${i}: lance ${k} es ${got.lance}, esperado ${l.lance}`);
+        }
         const quienes = participantes(l.lance, m.jugadas, m.mano);
         if (JSON.stringify(quienes) !== JSON.stringify(l.participantes)) {
           fallos.push(`caso ${i} ${l.lance}: participantes ${quienes} != ${l.participantes}`);
