@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { rngSembrado } from '../../src/generar/rng';
 import { CLAVE_HISTORIAL } from '../../src/juego/historial';
 import type { Marca } from '../../src/juego/tanda';
-import { cartasDecisivas } from '../../src/juego/textos';
+import { cartasDecisivas, explicarLance } from '../../src/juego/textos';
 import { contarMano } from '../../src/reglas/contar';
 import { montarApp } from '../../src/ui/app';
 import { graficaMarcas, MARCAS_EN_GRAFICA } from '../../src/ui/grafica';
@@ -157,6 +157,15 @@ describe('interfaz', () => {
       Number(e.getAttribute('data-puesto')),
     );
     expect(resaltadas.sort()).toEqual([...cartasDecisivas(cobros[i]!)].sort());
+
+    // Grande compara jugadas de cuatro cartas: cada una va en su bloque y el texto no cambia.
+    const grande = p.raiz.querySelector('tr[data-lance="0"] .porque');
+    expect(grande?.textContent).toBe(explicarLance(cobros[0]!, mano!));
+    const bloques = [...(grande?.querySelectorAll('.jugada-texto') ?? [])].map((e) => e.textContent);
+    if (cobros[0]!.puestoGanador !== null) {
+      expect(bloques).toHaveLength(2);
+      for (const b of bloques) expect(b).toMatch(/^\d{1,2}( \d{1,2}){3}$/);
+    }
 
     siguiente(p);
     expect(p.raiz.textContent).toContain('Mano 2 / 10');

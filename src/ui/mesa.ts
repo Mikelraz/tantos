@@ -81,7 +81,6 @@ function marco(doc: Document, palo: Palo): SVGElement {
 }
 
 function dibujarCarta(doc: Document, c: Carta): HTMLElement {
-  const numero = simbolo(c);
   return h(
     doc,
     'span',
@@ -91,9 +90,9 @@ function dibujarCarta(doc: Document, c: Carta): HTMLElement {
       'aria-label': `${NOMBRE_RANGO[c.rango]} de ${NOMBRE_PALO[c.palo]}`,
     },
     marco(doc, c.palo),
-    h(doc, 'span', { class: 'indice arriba', 'aria-hidden': 'true' }, numero),
+    // Un solo número por carta: repetido boca abajo dobla lo que hay que leer.
+    h(doc, 'span', { class: 'indice', 'aria-hidden': 'true' }, simbolo(c)),
     iconoPalo(doc, c.palo),
-    h(doc, 'span', { class: 'indice abajo', 'aria-hidden': 'true' }, numero),
   );
 }
 

@@ -4,7 +4,7 @@
   --fieltro: #1d7049;
   --fieltro-borde: #134f34;
   --texto: #f7f5ee;
-  --suave: rgba(247, 245, 238, 0.74);
+  --suave: rgba(247, 245, 238, 0.9);
   --linea: rgba(255, 255, 255, 0.16);
   --panel: rgba(0, 0, 0, 0.16);
   --tecla: rgba(255, 255, 255, 0.13);
@@ -15,10 +15,9 @@
   --carta-borde: #c9bb98;
   --dorso: #9b2d22;
   --dorso-2: #6d1d16;
-  --tinta-oros: #8a5d05;
-  --tinta-copas: #a32a1c;
-  --tinta-espadas: #22508f;
-  --tinta-bastos: #2f5e22;
+  /* Una sola tinta para los números: el palo no cuenta en el mus y el rojo y el azul son de las parejas. */
+  --tinta: #1f1b16;
+  --serif: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Noto Serif', 'Droid Serif', Georgia, serif;
 
   --nos: #2f6fd6;
   --nos-fondo: rgba(47, 111, 214, 0.28);
@@ -29,7 +28,8 @@
 
   --oro: #f2c94c;
   --oro-texto: #262113;
-  --fallo: #ffa596;
+  --fallo: #ffd0c6;
+  --resalte: #ffffff;
   --fallo-fondo: #7a2a1f;
   --acierto: #8be3ad;
 
@@ -120,7 +120,7 @@ tr:focus-visible {
 .pantalla {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* ---- Botón principal ---- */
@@ -142,8 +142,10 @@ tr:focus-visible {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
+/* Desactivado se ve neutro: el oro a medias sobre verde parecía otro color, no un estado. */
 .comprobar:disabled {
-  opacity: 0.4;
+  background: var(--tecla);
+  color: var(--suave);
   cursor: default;
   box-shadow: none;
 }
@@ -158,9 +160,10 @@ tr:focus-visible {
 
 .logo {
   margin: 0;
-  font-size: 52px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   text-align: center;
 }
 
@@ -196,7 +199,7 @@ tr:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 32px;
+  min-height: 28px;
   font-size: 15px;
   font-weight: 650;
 }
@@ -255,8 +258,8 @@ tr:focus-visible {
     'izquierda centro derecha'
     'abajo abajo abajo';
   align-items: center;
-  row-gap: 6px;
-  padding: 10px 6px;
+  row-gap: 2px;
+  padding: 6px;
   border-radius: 18px;
   background: rgba(0, 0, 0, 0.12);
   box-shadow: inset 0 0 0 1px var(--linea);
@@ -270,7 +273,7 @@ tr:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   padding: 3px;
   border-radius: 9px;
   transition: opacity 0.15s;
@@ -298,7 +301,7 @@ tr:focus-visible {
   gap: 3px;
 }
 
-/* Naipe español clásico: papel marfil, marco con pintas, índices en las esquinas y el palo al centro. */
+/* Naipe español clásico: papel marfil, marco con pintas, el número en la esquina y el palo debajo. */
 .carta {
   position: relative;
   display: inline-block;
@@ -320,7 +323,7 @@ tr:focus-visible {
   stroke: var(--tinta);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  opacity: 0.85;
+  opacity: 0.45;
 }
 
 .marco path {
@@ -329,47 +332,22 @@ tr:focus-visible {
 
 .indice {
   position: absolute;
-  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Noto Serif', 'Droid Serif', Georgia, serif;
-  font-size: calc(var(--carta-an) * 0.42);
+  top: 9%;
+  left: 13%;
+  font-family: var(--serif);
+  font-size: calc(var(--carta-an) * 0.5);
   font-weight: 700;
   font-variant-numeric: lining-nums;
   line-height: 1;
   letter-spacing: -0.06em;
-  text-align: center;
-  min-width: 0.6em;
-}
-
-.indice.arriba {
-  top: 8%;
-  left: 11%;
-}
-
-.indice.abajo {
-  bottom: 8%;
-  right: 11%;
-  transform: rotate(180deg);
 }
 
 .palo {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: calc(var(--carta-an) * 0.38);
-  height: calc(var(--carta-an) * 0.38);
-  transform: translate(-50%, -50%);
-}
-
-.palo-0 {
-  --tinta: var(--tinta-oros);
-}
-.palo-1 {
-  --tinta: var(--tinta-copas);
-}
-.palo-2 {
-  --tinta: var(--tinta-espadas);
-}
-.palo-3 {
-  --tinta: var(--tinta-bastos);
+  right: 12%;
+  bottom: 9%;
+  width: calc(var(--carta-an) * 0.4);
+  height: calc(var(--carta-an) * 0.4);
 }
 
 .palo-0 .relleno {
@@ -427,19 +405,24 @@ tr:focus-visible {
   padding-bottom: 3px;
 }
 
-.jugada.es-mano {
-  box-shadow: 0 0 0 2px var(--oro);
-}
+/* La mano: etiqueta invertida (papel con letra de la pareja), sin dorado. */
 .jugada.es-mano .etiqueta {
-  box-shadow: 0 0 0 2px var(--oro);
+  background: var(--texto);
+}
+.jugada.es-mano.pareja-0 .etiqueta {
+  color: #1d4f9e;
+}
+.jugada.es-mano.pareja-1 .etiqueta {
+  color: #9a2f1f;
 }
 
-/* Resaltado de las cartas que deciden un lance (solución). */
+/* Resaltado de las cartas que deciden un lance (solución): se levantan con borde blanco. */
 .mesa.con-resalte .jugada:not(.resaltada) {
   opacity: 0.4;
 }
 .jugada.resaltada .carta {
-  box-shadow: 0 0 0 2px var(--oro), 0 1px 2px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 2px var(--resalte), 0 3px 6px rgba(0, 0, 0, 0.45);
 }
 
 /* Cartas tapadas durante la pausa. */
@@ -460,14 +443,14 @@ tr:focus-visible {
 .lances {
   list-style: none;
   margin: 0;
-  padding: 2px 4px;
-  font-size: 14.5px;
+  padding: 0 4px;
+  font-size: 14px;
 }
 
 .lances li {
   display: flex;
   gap: 6px;
-  padding: 4px 2px;
+  padding: 2px 2px;
   border-bottom: 1px solid var(--linea);
 }
 
@@ -495,7 +478,7 @@ tr:focus-visible {
 .respuesta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .casillas {
@@ -504,12 +487,13 @@ tr:focus-visible {
   gap: 8px;
 }
 
+/* Nombre a la izquierda y número a la derecha: la misma lectura en menos alto. */
 .casilla {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  min-height: 64px;
-  padding: 4px 8px 6px;
+  justify-content: space-between;
+  min-height: 50px;
+  padding: 4px 12px;
   border-radius: var(--radio);
   border: 2px solid transparent;
 }
@@ -524,15 +508,17 @@ tr:focus-visible {
 }
 
 .casilla.seleccionada {
-  box-shadow: 0 0 0 3px var(--oro);
+  box-shadow: 0 0 0 3px var(--resalte);
 }
 
 .casilla .nombre {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
 }
 
 .casilla .valor {
+  min-width: 1.2em;
+  text-align: right;
   font-size: 30px;
   font-weight: 800;
   line-height: 1.1;
@@ -562,8 +548,9 @@ tr:focus-visible {
   gap: 6px;
 }
 
+/* 46 px: sigue siendo un blanco cómodo y deja "Comprobar" a la vista en un móvil con navegador. */
 .tecla {
-  min-height: 52px;
+  min-height: 46px;
   border-radius: 10px;
   background: var(--tecla);
   font-size: 24px;
@@ -588,6 +575,7 @@ tr:focus-visible {
 
 .teclado .comprobar {
   grid-column: span 4;
+  min-height: 46px;
 }
 
 /* ---- Pausa ---- */
@@ -602,13 +590,15 @@ tr:focus-visible {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  background: rgba(6, 22, 15, 0.9);
-  backdrop-filter: blur(6px);
+  /* Las cartas ya están boca abajo: la capa deja ver el dorso en lugar de ocultarlo. */
+  background: rgba(6, 22, 15, 0.62);
+  backdrop-filter: blur(1.5px);
 }
 
 .capa-pausa .titulo {
   font-size: 30px;
   font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .capa-pausa .accion {
@@ -624,7 +614,7 @@ tr:focus-visible {
 
 .veredicto {
   margin: 0;
-  padding: 8px;
+  padding: 6px 8px;
   border-radius: var(--radio);
   background: var(--fallo-fondo);
   text-align: center;
@@ -661,7 +651,7 @@ tr:focus-visible {
 }
 
 .desglose td {
-  padding: 5px 6px;
+  padding: 4px 6px;
   border-bottom: 1px solid var(--linea);
   text-align: right;
   vertical-align: top;
@@ -685,7 +675,11 @@ tr:focus-visible {
 }
 
 .desglose tbody tr.activa {
-  background: rgba(242, 201, 76, 0.16);
+  background: rgba(255, 255, 255, 0.12);
+}
+/* En la celda y no en la fila: Safari no pinta sombras en <tr>. */
+.desglose tbody tr.activa td.lance {
+  box-shadow: inset 3px 0 0 var(--resalte);
 }
 
 .porque {
@@ -694,6 +688,15 @@ tr:focus-visible {
   font-size: 12.5px;
   font-weight: 400;
   color: var(--suave);
+}
+
+/* Las cuatro cartas de una jugada en una explicación ("12 11 10 6"): juntas y destacadas. */
+.porque .jugada-texto {
+  font-weight: 700;
+  color: var(--texto);
+  white-space: nowrap;
+  /* Aire entre cartas: "1 1 11 12" no debe leerse "11 11 12". */
+  word-spacing: 0.2em;
 }
 
 .desglose .total td {
@@ -721,7 +724,9 @@ tr:focus-visible {
 .pantalla-fin h1 {
   margin: 8px 0 0;
   text-align: center;
-  font-size: 26px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .datos {
@@ -803,8 +808,9 @@ tr:focus-visible {
   background: rgba(139, 227, 173, 0.16);
 }
 
+/* Rojo opaco: translúcido sobre el verde se volvía marrón. */
 .manos li.fallo {
-  background: rgba(200, 68, 47, 0.6);
+  background: var(--fallo-fondo);
 }
 
 .manos .numero {
@@ -826,9 +832,15 @@ tr:focus-visible {
 }
 
 .evolucion figcaption {
+  display: flex;
+  justify-content: space-between;
   font-size: 13px;
   font-weight: 650;
   color: var(--suave);
+}
+
+.evolucion .sentido {
+  font-weight: 400;
 }
 
 .grafica {
@@ -897,11 +909,12 @@ tr:focus-visible {
   }
 }
 
-/* La solución tiene que caber con "Siguiente" a la vista en ~740 px. */
+/* Solución: cartas algo menores (aquí manda la tabla) y "Siguiente" siempre a la vista. */
 .pantalla-solucion {
-  gap: 8px;
+  --carta-an: clamp(24px, calc(8.5vw - 2px), 40px);
 }
-.pantalla-solucion .mesa {
-  padding: 6px;
-  row-gap: 3px;
+.pantalla-solucion > .principal {
+  position: sticky;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 -4px 18px rgba(0, 0, 0, 0.35);
 }

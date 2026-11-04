@@ -12,6 +12,20 @@ export const GUARDA_SIGUIENTE_MS = 350;
 
 const CABECERA_PAREJA = ['Nos.', 'Ellos'] as const;
 
+/** Cuatro números seguidos: una jugada escrita carta a carta ("12 11 10 6"), en grande y chica. */
+const JUGADA_EN_TEXTO = /(\d{1,2}(?: \d{1,2}){3})/;
+
+/** La explicación con cada jugada en su propio bloque, para no confundir las dos que se comparan. */
+function explicacion(doc: Document, texto: string): HTMLElement {
+  const e = h(doc, 'span', { class: 'porque' });
+  texto.split(JUGADA_EN_TEXTO).forEach((trozo, i) => {
+    // Con un grupo en la expresión, `split` deja las coincidencias en las posiciones impares.
+    if (i % 2 === 1) e.append(h(doc, 'span', { class: 'jugada-texto' }, trozo));
+    else if (trozo !== '') e.append(trozo);
+  });
+  return e;
+}
+
 function celda(doc: Document, p: Pareja, falladas: Pareja[], valor: string, cabecera = false): HTMLElement {
   const clase = `col-${p}${falladas.includes(p) ? ' fallo' : ''}`;
   return cabecera ? h(doc, 'th', { class: clase, scope: 'col' }, valor) : h(doc, 'td', { class: clase }, valor);
@@ -54,7 +68,7 @@ export function pantallaSolucion(
         'td',
         { class: 'lance' },
         NOMBRE_LANCE[c.lance],
-        h(doc, 'span', { class: 'porque' }, explicarLance(c, mano)),
+        explicacion(doc, explicarLance(c, mano)),
       ),
       ...([0, 1] as const).map((p) => {
         const n = c.apuesta[p] + c.tantos[p];

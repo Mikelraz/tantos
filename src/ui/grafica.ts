@@ -68,7 +68,13 @@ export function graficaMarcas(doc: Document, todas: readonly Marca[]): HTMLEleme
     doc,
     'figure',
     { class: 'evolucion' },
-    h(doc, 'figcaption', {}, 'Evolución del tiempo'),
+    h(
+      doc,
+      'figcaption',
+      {},
+      h(doc, 'span', {}, 'Evolución del tiempo'),
+      h(doc, 'span', { class: 'sentido' }, 'más abajo, más rápido'),
+    ),
     grafica,
     h(
       doc,
