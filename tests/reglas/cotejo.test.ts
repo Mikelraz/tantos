@@ -60,12 +60,16 @@ describe('ganadorCotejo (desempate por la mano)', () => {
   ])('grande idéntica en 1 y 2, mano %i gana %i', (mano, esperado) => {
     expect(ganadorCotejo('grande', js, participantes('grande', js, mano), mano)).toBe(esperado);
   });
-  it('dos 31, la real incluida, con la mano en 3 gana el más cercano a 3', () => {
-    const j31: Jugadas = [jugada('R R 7 5'), jugada('1 2 3 4'), jugada('R C 6 5'), jugada('1 1 2 4')];
-    // 0: 10+10+7+5=32; usamos 31 reales: R R 7 4 y C S 6 5
-    const dos: Jugadas = [jugada('R R 7 4'), j31[1], jugada('C S 6 5'), j31[3]];
-    const p = participantes('juego', dos, 3);
-    expect(p).toEqual([0, 2]);
-    expect(ganadorCotejo('juego', dos, p, 3)).toBe(0);
+  it.each([
+    [0, 0],
+    [1, 1],
+    [2, 0],
+    [3, 0],
+  ])('la real 7 7 7 S (pareja 0) contra un 31 normal (pareja 1), mano %i gana %i', (mano, esperado) => {
+    // 7+7+7+10 = 31 con la real incluida; R C S 1 = 31 ordinario. No hay escalón propio para la real.
+    const js: Jugadas = [jugada('7 7 7 S'), jugada('R C S 1'), jugada('1 2 3 4'), jugada('1 1 2 4')];
+    const p = participantes('juego', js, mano);
+    expect([...p].sort()).toEqual([0, 1]);
+    expect(ganadorCotejo('juego', js, p, mano)).toBe(esperado);
   });
 });
