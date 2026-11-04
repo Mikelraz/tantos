@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icono.svg', 'icono-apple-180.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
       },
