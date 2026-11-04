@@ -49,6 +49,15 @@ describe('historial', () => {
     expect(cargarHistorial(almacenFalso({ [CLAVE_HISTORIAL]: '[{"fallos":"x"}]' }))).toEqual([]);
   });
 
+  it('una entrada mal formada no borra las marcas válidas al guardar otra', () => {
+    const m1 = marca(1, 500, '2026-11-01T10:00:00.000Z');
+    const a = almacenFalso({ [CLAVE_HISTORIAL]: JSON.stringify([m1, { fallos: 'x' }, 7]) });
+    expect(cargarHistorial(a)).toEqual([m1]);
+    const m2 = marca(0, 700, '2026-11-02T10:00:00.000Z');
+    guardarMarca(m2, a);
+    expect(cargarHistorial(a)).toEqual([m1, m2]);
+  });
+
   it('guardar dos marcas y cargarlas las devuelve en orden', () => {
     const a = almacenFalso();
     const m1 = marca(1, 500, '2026-11-01T10:00:00.000Z');

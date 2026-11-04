@@ -19,7 +19,9 @@ export function cargarHistorial(almacen: Storage | null): Marca[] {
     const bruto = almacen.getItem(CLAVE_HISTORIAL);
     if (bruto === null) return [];
     const datos: unknown = JSON.parse(bruto);
-    return Array.isArray(datos) && datos.every(esMarca) ? datos : [];
+    // Se conservan las entradas válidas: descartarlo todo por una mala haría que el siguiente
+    // `guardarMarca` sobrescribiera el historial entero.
+    return Array.isArray(datos) ? datos.filter(esMarca) : [];
   } catch {
     return [];
   }
