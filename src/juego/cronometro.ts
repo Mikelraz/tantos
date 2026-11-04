@@ -25,6 +25,12 @@ export class Cronometro {
     this.inicioTramo = this.ahora();
   }
 
+  /** Décimas acumuladas hasta ahora, sin parar el cronómetro (para el reloj en pantalla). */
+  leer(): number {
+    const tramo = this.inicioTramo === null ? 0 : this.ahora() - this.inicioTramo;
+    return Math.floor((this.acumuladoMs + tramo) / 100);
+  }
+
   /** Para el cronómetro y devuelve el tiempo acumulado en décimas de segundo. */
   detener(): number {
     this.pausar();

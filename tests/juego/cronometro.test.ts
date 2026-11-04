@@ -60,4 +60,20 @@ describe('Cronometro', () => {
     r.poner(9500);
     expect(c.detener()).toBe(5);
   });
+
+  it('leer da las décimas hasta ahora sin parar ni contar la pausa', () => {
+    const r = relojFalso();
+    const c = new Cronometro(r.ahora);
+    c.iniciar();
+    r.poner(1290);
+    expect(c.leer()).toBe(12);
+    expect(c.enMarcha).toBe(true);
+    c.pausar();
+    r.poner(5000);
+    expect(c.leer()).toBe(12);
+    c.reanudar();
+    r.poner(5800);
+    expect(c.leer()).toBe(20);
+    expect(c.detener()).toBe(20);
+  });
 });

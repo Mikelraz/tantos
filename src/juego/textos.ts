@@ -24,7 +24,7 @@ export type Posicion = 'abajo' | 'derecha' | 'arriba' | 'izquierda';
 
 const POSICIONES: readonly Posicion[] = ['abajo', 'derecha', 'arriba', 'izquierda'];
 const ETIQUETAS = ['Tú', 'Rival', 'Compañero', 'Rival'] as const;
-const NOMBRE_LANCE: Record<Lance, string> = {
+export const NOMBRE_LANCE: Record<Lance, string> = {
   grande: 'Grande',
   chica: 'Chica',
   pares: 'Pares',

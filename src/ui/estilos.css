@@ -1,0 +1,855 @@
+/* Tantos: tapete verde, cartas claras, Nosotros en azul y Ellos en rojo. */
+
+:root {
+  --fieltro: #1d7049;
+  --fieltro-borde: #134f34;
+  --texto: #f7f5ee;
+  --suave: rgba(247, 245, 238, 0.74);
+  --linea: rgba(255, 255, 255, 0.16);
+  --panel: rgba(0, 0, 0, 0.16);
+  --tecla: rgba(255, 255, 255, 0.13);
+  --tecla-activa: rgba(255, 255, 255, 0.28);
+
+  --carta: #fdfaf2;
+  --carta-texto: #1f1d1a;
+  --carta-borde: #d9d0ba;
+  --dorso: #8a2f24;
+  --dorso-2: #6d241b;
+
+  --nos: #2f6fd6;
+  --nos-fondo: rgba(47, 111, 214, 0.28);
+  --nos-texto: #b6d0ff;
+  --ellos: #c8442f;
+  --ellos-fondo: rgba(200, 68, 47, 0.28);
+  --ellos-texto: #ffc0b4;
+
+  --oro: #f2c94c;
+  --oro-texto: #262113;
+  --fallo: #ffa596;
+  --fallo-fondo: #7a2a1f;
+  --acierto: #8be3ad;
+
+  --palo-oros: #d79a14;
+  --palo-oros-2: #8f6208;
+  --palo-copas: #c23a2a;
+  --palo-espadas: #2c5fa8;
+  --palo-bastos: #3f7a2e;
+  --palo-bastos-2: #24481a;
+
+  --carta-an: clamp(28px, 9vw, 40px);
+  --radio: 12px;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fieltro: #0f3324;
+    --fieltro-borde: #081c14;
+    --texto: #e6e4dc;
+    --suave: rgba(230, 228, 220, 0.66);
+    --linea: rgba(255, 255, 255, 0.11);
+    --panel: rgba(0, 0, 0, 0.28);
+    --tecla: rgba(255, 255, 255, 0.08);
+    --tecla-activa: rgba(255, 255, 255, 0.2);
+
+    --carta: #e4ddcb;
+    --carta-texto: #181614;
+    --carta-borde: #b9ae94;
+
+    --nos: #3d72c9;
+    --nos-fondo: rgba(61, 114, 201, 0.24);
+    --ellos: #bf4f3b;
+    --ellos-fondo: rgba(191, 79, 59, 0.24);
+
+    --oro: #dcb544;
+    --fallo-fondo: #5e2219;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--fieltro-borde);
+  background-image: radial-gradient(ellipse 120% 80% at 50% 35%, var(--fieltro) 0%, var(--fieltro-borde) 100%);
+  background-attachment: fixed;
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.35;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:focus-visible,
+tr:focus-visible {
+  outline: 3px solid var(--oro);
+  outline-offset: 2px;
+}
+
+.pantalla {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- Botón principal ---- */
+
+.principal,
+.comprobar {
+  min-height: 52px;
+  border-radius: var(--radio);
+  background: var(--oro);
+  color: var(--oro-texto);
+  font-size: 18px;
+  font-weight: 750;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.principal:active,
+.comprobar:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.comprobar:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* ---- Inicio ---- */
+
+.pantalla-inicio {
+  min-height: calc(100dvh - 24px);
+  justify-content: center;
+  gap: 16px;
+}
+
+.logo {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.lema {
+  margin: 0;
+  text-align: center;
+  font-size: 17px;
+  color: var(--suave);
+}
+
+.reglas {
+  margin: 0;
+  padding: 12px 14px 12px 32px;
+  border-radius: var(--radio);
+  background: var(--panel);
+  color: var(--suave);
+}
+
+.reglas li + li {
+  margin-top: 4px;
+}
+
+.pantalla-inicio .mejor {
+  margin: 0;
+  text-align: center;
+  font-size: 17px;
+}
+
+/* ---- Barra superior ---- */
+
+.barra {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 32px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.contador {
+  color: var(--suave);
+}
+
+.reloj {
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+}
+
+.reloj.parado::before {
+  content: '❚❚ ';
+  font-size: 11px;
+  vertical-align: 2px;
+  opacity: 0.7;
+}
+
+.aviso-acierto {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--acierto);
+  font-size: 14px;
+  pointer-events: none;
+  animation: desvanecer 1.4s ease-out forwards;
+}
+
+@keyframes desvanecer {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- Mesa ---- */
+
+.mesa {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr minmax(8px, 1fr) 1fr;
+  grid-template-areas:
+    'arriba arriba arriba'
+    'izquierda centro derecha'
+    'abajo abajo abajo';
+  align-items: center;
+  row-gap: 6px;
+  padding: 10px 6px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 1px var(--linea);
+}
+
+.tapete {
+  grid-area: centro;
+}
+
+.jugada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 9px;
+  transition: opacity 0.15s;
+}
+
+.pos-arriba {
+  grid-area: arriba;
+  justify-self: center;
+}
+.pos-abajo {
+  grid-area: abajo;
+  justify-self: center;
+}
+.pos-izquierda {
+  grid-area: izquierda;
+  justify-self: start;
+}
+.pos-derecha {
+  grid-area: derecha;
+  justify-self: end;
+}
+
+.cartas {
+  display: flex;
+  gap: 3px;
+}
+
+.carta {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: var(--carta-an);
+  height: calc(var(--carta-an) * 1.42);
+  border-radius: 5px;
+  background: var(--carta);
+  color: var(--carta-texto);
+  border: 1px solid var(--carta-borde);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.simbolo {
+  font-size: calc(var(--carta-an) * 0.5);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.palo {
+  width: calc(var(--carta-an) * 0.56);
+  height: calc(var(--carta-an) * 0.56);
+}
+
+.palo-0 .relleno {
+  fill: var(--palo-oros);
+}
+.palo-0 .trazo {
+  fill: none;
+  stroke: var(--palo-oros-2);
+  stroke-width: 1.6;
+}
+.palo-0 .simbolo {
+  color: #8a5d05;
+}
+.palo-1 .relleno {
+  fill: var(--palo-copas);
+}
+.palo-1 .simbolo {
+  color: #a32a1c;
+}
+.palo-2 .relleno {
+  fill: var(--palo-espadas);
+}
+.palo-2 .simbolo {
+  color: #22508f;
+}
+.palo-3 .relleno {
+  fill: var(--palo-bastos);
+}
+.palo-3 .nudo {
+  fill: var(--palo-bastos-2);
+}
+.palo-3 .simbolo {
+  color: #2f5e22;
+}
+
+.etiqueta {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.jugada.pareja-0 .etiqueta {
+  background: var(--nos);
+}
+.jugada.pareja-1 .etiqueta {
+  background: var(--ellos);
+}
+
+.jugada.pareja-0 .cartas {
+  border-bottom: 3px solid var(--nos);
+  padding-bottom: 3px;
+}
+.jugada.pareja-1 .cartas {
+  border-bottom: 3px solid var(--ellos);
+  padding-bottom: 3px;
+}
+
+.jugada.es-mano {
+  box-shadow: 0 0 0 2px var(--oro);
+}
+.jugada.es-mano .etiqueta {
+  box-shadow: 0 0 0 2px var(--oro);
+}
+
+/* Resaltado de las cartas que deciden un lance (solución). */
+.mesa.con-resalte .jugada:not(.resaltada) {
+  opacity: 0.4;
+}
+.jugada.resaltada .carta {
+  box-shadow: 0 0 0 2px var(--oro), 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Cartas tapadas durante la pausa. */
+.mesa.tapada .carta {
+  background: repeating-linear-gradient(45deg, var(--dorso) 0 4px, var(--dorso-2) 4px 8px);
+  border-color: var(--dorso-2);
+}
+.mesa.tapada .carta > * {
+  visibility: hidden;
+}
+
+/* ---- Lances ---- */
+
+.lances {
+  list-style: none;
+  margin: 0;
+  padding: 2px 4px;
+  font-size: 14.5px;
+}
+
+.lances li {
+  display: flex;
+  gap: 6px;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.lances li:last-child {
+  border-bottom: 0;
+}
+
+.nombre-lance {
+  flex: 0 0 56px;
+  font-weight: 700;
+}
+
+.nombre-pareja {
+  font-weight: 700;
+}
+.nombre-pareja.pareja-0 {
+  color: var(--nos-texto);
+}
+.nombre-pareja.pareja-1 {
+  color: var(--ellos-texto);
+}
+
+/* ---- Respuesta: casillas y teclado ---- */
+
+.respuesta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.casillas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.casilla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 64px;
+  padding: 4px 8px 6px;
+  border-radius: var(--radio);
+  border: 2px solid transparent;
+}
+
+.casilla.pareja-0 {
+  background: var(--nos-fondo);
+  border-color: var(--nos);
+}
+.casilla.pareja-1 {
+  background: var(--ellos-fondo);
+  border-color: var(--ellos);
+}
+
+.casilla.seleccionada {
+  box-shadow: 0 0 0 3px var(--oro);
+}
+
+.casilla .nombre {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.casilla .valor {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.casilla .valor:empty::before {
+  content: '–';
+  opacity: 0.35;
+}
+
+.casilla.seleccionada .valor:empty::before {
+  content: '_';
+  opacity: 0.7;
+  animation: parpadeo 1s steps(1) infinite;
+}
+
+@keyframes parpadeo {
+  50% {
+    opacity: 0;
+  }
+}
+
+.teclado {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.tecla {
+  min-height: 52px;
+  border-radius: 10px;
+  background: var(--tecla);
+  font-size: 24px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.tecla:active {
+  background: var(--tecla-activa);
+}
+
+.tecla.borrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icono {
+  width: 26px;
+  height: 26px;
+}
+
+.teclado .comprobar {
+  grid-column: span 4;
+}
+
+/* ---- Pausa ---- */
+
+.capa-pausa {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(6, 22, 15, 0.9);
+  backdrop-filter: blur(6px);
+}
+
+.capa-pausa .titulo {
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.capa-pausa .accion {
+  padding: 12px 22px;
+  border-radius: var(--radio);
+  background: var(--oro);
+  color: var(--oro-texto);
+  font-size: 18px;
+  font-weight: 750;
+}
+
+/* ---- Solución ---- */
+
+.veredicto {
+  margin: 0;
+  padding: 8px;
+  border-radius: var(--radio);
+  background: var(--fallo-fondo);
+  text-align: center;
+  font-size: 15px;
+}
+
+.veredicto b {
+  font-size: 18px;
+}
+
+.pista {
+  margin: -4px 0 -4px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--suave);
+}
+
+.desglose {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.desglose th {
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--suave);
+  text-align: right;
+}
+
+.desglose th:first-child {
+  text-align: left;
+}
+
+.desglose td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--linea);
+  text-align: right;
+  vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+
+.desglose td.col-0,
+.desglose td.col-1 {
+  width: 48px;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.desglose td.lance {
+  text-align: left;
+  font-weight: 700;
+}
+
+.desglose tbody tr {
+  cursor: pointer;
+}
+
+.desglose tbody tr.activa {
+  background: rgba(242, 201, 76, 0.16);
+}
+
+.porque {
+  display: block;
+  margin-top: 1px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--suave);
+}
+
+.desglose .total td {
+  border-top: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 0;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.desglose .total td:first-child {
+  text-align: left;
+}
+
+.desglose .col-0.fallo,
+.desglose .col-1.fallo {
+  color: var(--fallo);
+}
+
+.desglose td.fallo {
+  background: rgba(200, 68, 47, 0.14);
+}
+
+/* ---- Fin ---- */
+
+.pantalla-fin h1 {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 26px;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: var(--radio);
+  background: var(--panel);
+}
+
+.dato .titulo {
+  font-size: 13px;
+  color: var(--suave);
+}
+
+.dato .valor {
+  font-size: 38px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.record,
+.pantalla-fin .mejor {
+  margin: 0;
+  padding: 10px;
+  border-radius: var(--radio);
+  text-align: center;
+}
+
+.record {
+  border: 2px solid var(--oro);
+  color: var(--oro);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.record::before {
+  content: '★ ';
+}
+
+.record .antes {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pantalla-fin .mejor {
+  background: var(--panel);
+}
+
+.manos {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.manos li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.manos li.acierto {
+  background: rgba(139, 227, 173, 0.16);
+}
+
+.manos li.fallo {
+  background: rgba(200, 68, 47, 0.6);
+}
+
+.manos .numero {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.manos .tiempo {
+  color: var(--suave);
+}
+
+/* ---- Gráfica ---- */
+
+.evolucion {
+  margin: 0;
+  padding: 8px 10px 6px;
+  border-radius: var(--radio);
+  background: var(--panel);
+}
+
+.evolucion figcaption {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--suave);
+}
+
+.grafica {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grafica .guia {
+  stroke: var(--linea);
+  stroke-width: 1;
+}
+
+.grafica .eje {
+  fill: var(--suave);
+  font-size: 11px;
+}
+
+.grafica .traza {
+  fill: none;
+  stroke: var(--suave);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.grafica .punto {
+  fill: var(--fieltro);
+  stroke: var(--texto);
+  stroke-width: 1.5;
+}
+
+.grafica .punto.limpia {
+  fill: var(--oro);
+  stroke: var(--oro);
+}
+
+.grafica .punto.actual {
+  stroke-width: 2.5;
+}
+
+.leyenda {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--suave);
+}
+
+.muestra {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--texto);
+  vertical-align: -1px;
+}
+
+.muestra.limpia {
+  background: var(--oro);
+  border-color: var(--oro);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* El aviso de acierto solo se desvanece; sin su animación se quedaría fijo. */
+  *:not(.aviso-acierto) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* La solución tiene que caber con "Siguiente" a la vista en ~740 px. */
+.pantalla-solucion {
+  gap: 8px;
+}
+.pantalla-solucion .mesa {
+  padding: 6px;
+  row-gap: 3px;
+}
