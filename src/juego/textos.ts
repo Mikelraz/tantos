@@ -49,9 +49,13 @@ export function simbolo(c: Carta): string {
   return SIMBOLO_RANGO[c.rango];
 }
 
-/** Símbolo de una fuerza ordinal (As 1 ... Rey 10): de 8 en adelante son S, C, R. */
-function simboloDeFuerza(f: number): string {
-  return f >= 8 ? SIMBOLO_RANGO[(f + 2) as Rango] : String(f);
+/** Nombre en plural de una fuerza ordinal (As 1 ... Rey 10), para explicar los pares. */
+const PLURAL_FUERZA = [
+  '', 'ases', 'doses', 'treses', 'cuatros', 'cincos', 'seises', 'sietes', 'sotas', 'caballos', 'reyes',
+] as const;
+
+function pluralDeFuerza(f: number): string {
+  return PLURAL_FUERZA[f] as string;
 }
 
 export function lineaLance(l: LanceJugado): string {
@@ -86,10 +90,10 @@ export function lineaLance(l: LanceJugado): string {
 }
 
 function describirPares(p: JugadaPares): string {
-  const [a, b] = p.rangos.map(simboloDeFuerza);
+  const [a, b] = p.rangos.map(pluralDeFuerza);
   if (p.categoria === 1) return `pareja de ${a}`;
   if (p.categoria === 2) return `medias de ${a}`;
-  return `duples de ${a} y ${b}`;
+  return a === b ? `duples de ${a}` : `duples de ${a} y ${b}`;
 }
 
 /** Cómo se ve una jugada en el cotejo de un lance. */

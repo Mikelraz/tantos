@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { jugada } from '../../src/reglas/cartas';
+import type { Jugadas } from '../../src/reglas/cotejo';
 import type { Intervencion } from '../../src/reglas/apuestas';
 import { contarMano, type LanceJugado, type ManoJugada } from '../../src/reglas/contar';
 import {
@@ -80,12 +81,47 @@ describe('explicarLance', () => {
   it('explica el ejemplo de los bocetos', () => {
     expect(explicarLance(g, mano)).toBe('RR75 gana a RCS1 · envite querido 2');
     expect(explicarLance(c, mano)).toBe('no quiero → 1');
-    expect(explicarLance(p, mano)).toBe('solo Nosotros · pareja de R 1 + pareja de 7 1');
+    expect(explicarLance(p, mano)).toBe('solo Nosotros · pareja de reyes 1 + pareja de sietes 1');
     expect(explicarLance(j, mano)).toBe('31 gana a 32 · envite querido 2 · 31 vale 3');
   });
   it('la chica se compara de menor a mayor', () => {
     const m: ManoJugada = { ...mano, lances: [pasan('grande'), pasan('chica'), l('pares'), l('juego', env(0, 2), quiero(3))] };
     expect(explicarLance(contarMano(m).lances[1] as typeof g, m)).toBe('14SC gana a 477S · en paso 1');
+  });
+  it('los pares usan nombres de rango: medias, duples mixtos y cuatro iguales', () => {
+    const pares = (cartas: string[], cuarto: LanceJugado['lance'], todos: boolean): string => {
+      const jugadas: Jugadas = [jugada(cartas[0] as string), jugada(cartas[1] as string), jugada('6 5 2 1'), jugada('6 4 3 1')];
+      const m: ManoJugada = {
+        jugadas,
+        mano: 0,
+        lances: [
+          pasan('grande'),
+          pasan('chica'),
+          l('pares', env(0, 2), quiero(1)),
+          cuarto === 'punto' ? pasan(cuarto) : todos ? l(cuarto, paso(0), paso(1)) : l(cuarto),
+        ],
+      };
+      return explicarLance(contarMano(m).lances[2] as typeof g, m);
+    };
+    expect(pares(['7 7 7 4', 'R R 5 5'], 'punto', true)).toBe(
+      'duples de reyes y cincos gana a medias de sietes · envite querido 2 · duples de reyes y cincos 3',
+    );
+    expect(pares(['R R 7 7', '4 4 4 1'], 'juego', false)).toBe(
+      'duples de reyes y sietes gana a medias de cuatros · envite querido 2 · duples de reyes y sietes 3',
+    );
+    expect(pares(['S S S S', 'C C 7 7'], 'juego', true)).toBe(
+      'duples de caballos y sietes gana a duples de sotas · envite querido 2 · duples de caballos y sietes 3',
+    );
+  });
+  it('los tantos de pareja y medias usan nombres de rango', () => {
+    const m: ManoJugada = {
+      jugadas: [jugada('7 7 7 4'), jugada('C 4 3 1'), jugada('S S 4 1'), jugada('6 4 3 1')],
+      mano: 0,
+      lances: [pasan('grande'), pasan('chica'), l('pares'), pasan('punto')],
+    };
+    expect(explicarLance(contarMano(m).lances[2] as typeof g, m)).toBe(
+      'solo Nosotros · medias de sietes 2 + pareja de sotas 1',
+    );
   });
   it('nadie tiene pares', () => {
     const m: ManoJugada = {
