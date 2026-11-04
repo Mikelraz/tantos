@@ -65,6 +65,12 @@ function responder(p: Preparado, acertar: boolean): [number, number] {
   return resp;
 }
 
+/** Pasa la guarda de «Siguiente» y avanza. */
+function siguiente(p: Preparado): void {
+  p.avanzar(400);
+  boton(p.raiz, 'Siguiente').click();
+}
+
 function ponerVisibilidad(estado: DocumentVisibilityState): void {
   Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => estado });
   document.dispatchEvent(new Event('visibilitychange'));
@@ -152,7 +158,7 @@ describe('interfaz', () => {
     );
     expect(resaltadas.sort()).toEqual([...cartasDecisivas(cobros[i]!)].sort());
 
-    boton(p.raiz, 'Siguiente').click();
+    siguiente(p);
     expect(p.raiz.textContent).toContain('Mano 2 / 10');
   });
 
@@ -163,7 +169,7 @@ describe('interfaz', () => {
     p.avanzar(4000);
     responder(p, false);
     p.avanzar(100_000);
-    boton(p.raiz, 'Siguiente').click();
+    siguiente(p);
     for (let n = 2; n <= 10; n++) {
       p.avanzar(1000);
       responder(p, true);
@@ -208,7 +214,7 @@ describe('interfaz', () => {
       expect(p.raiz.textContent).toContain(`Mano ${n} / 10`);
       p.avanzar(1234);
       responder(p, n !== 5);
-      if (n === 5) boton(p.raiz, 'Siguiente').click();
+      if (n === 5) siguiente(p);
     }
     expect(dato(p.raiz, 'fallos')).toBe('1');
     expect(dato(p.raiz, 'tiempo')).toBe('0:12,0');
@@ -225,7 +231,7 @@ describe('interfaz', () => {
     for (let n = 1; n <= 10; n++) {
       p.avanzar(2000);
       responder(p, false);
-      boton(p.raiz, 'Siguiente').click();
+      siguiente(p);
     }
     expect(dato(p.raiz, 'fallos')).toBe('10');
     expect(p.raiz.textContent).not.toContain('Nueva mejor marca');
@@ -243,6 +249,29 @@ describe('interfaz', () => {
     const p = preparar(almacen);
     expect(p.raiz.textContent).toContain('Mejor marca');
     expect(dato(p.raiz, 'mejor')).toBe('0 fallos · 1:15,4');
+  });
+
+  it('un toque en Siguiente justo tras la solución no hace nada; pasada la guarda avanza', () => {
+    const p = preparar();
+    boton(p.raiz, 'Empezar tanda').click();
+    responder(p, false);
+    boton(p.raiz, 'Siguiente').click(); // doble toque en Comprobar
+    expect(p.raiz.querySelector('.veredicto')).not.toBeNull();
+    expect(p.raiz.textContent).toContain('Mano 1 / 10');
+    p.avanzar(349);
+    boton(p.raiz, 'Siguiente').click();
+    expect(p.raiz.querySelector('.veredicto')).not.toBeNull();
+    p.avanzar(1);
+    boton(p.raiz, 'Siguiente').click();
+    expect(p.raiz.textContent).toContain('Mano 2 / 10');
+  });
+
+  it('sin almacén no se anuncia nueva mejor marca', () => {
+    const p = preparar(null);
+    boton(p.raiz, 'Empezar tanda').click();
+    for (let n = 1; n <= 10; n++) responder(p, true);
+    expect(dato(p.raiz, 'fallos')).toBe('0');
+    expect(p.raiz.textContent).not.toContain('Nueva mejor marca');
   });
 
   it('sin almacén la tanda se completa igual', () => {

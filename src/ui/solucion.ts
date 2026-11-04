@@ -7,6 +7,9 @@ import { boton, h } from './dom';
 import { tiempoLargo } from './formato';
 import { barra, dibujarMesa } from './mesa';
 
+/** Milisegundos tras mostrarse la solución en que "Siguiente" ignora los toques (doble toque en Comprobar). */
+export const GUARDA_SIGUIENTE_MS = 350;
+
 const CABECERA_PAREJA = ['Nos.', 'Ellos'] as const;
 
 function celda(doc: Document, p: Pareja, falladas: Pareja[], valor: string, cabecera = false): HTMLElement {
@@ -24,11 +27,13 @@ export function pantallaSolucion(
     respuesta: [number, number];
     decimas: number;
     alSeguir: () => void;
+    ahora: () => number;
   },
 ): HTMLElement {
   const { mano, desglose: d, respuesta: r } = o;
   const falladas = parejasFalladas(r, d);
   const mesa = dibujarMesa(doc, mano);
+  const mostradaEn = o.ahora();
 
   const veredicto = h(
     doc,
@@ -114,6 +119,13 @@ export function pantallaSolucion(
     mesa.elemento,
     h(doc, 'p', { class: 'pista' }, 'Toca un lance para ver qué cartas lo deciden.'),
     tabla,
-    boton(doc, 'Siguiente', o.alSeguir, 'principal'),
+    boton(
+      doc,
+      'Siguiente',
+      () => {
+        if (o.ahora() - mostradaEn >= GUARDA_SIGUIENTE_MS) o.alSeguir();
+      },
+      'principal',
+    ),
   );
 }

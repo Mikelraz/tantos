@@ -134,6 +134,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
         respuesta,
         decimas,
         alSeguir: () => siguienteMano(false),
+        ahora: o.ahora,
       }),
     );
   }
@@ -142,7 +143,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
     manoEnPantalla = null;
     const previo = cargarHistorial(o.almacen);
     const marca = crearMarca(resultados, new Date());
-    const nuevaMejor = esNuevaMejor(marca, previo);
+    const nuevaMejor = o.almacen !== null && esNuevaMejor(marca, previo);
     guardarMarca(marca, o.almacen);
     mostrar(
       pantallaFin(doc, {
