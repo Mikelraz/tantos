@@ -172,6 +172,12 @@ export function explicarLance(c: CobroLance, m: ManoJugada): string {
   return partes.join(SEPARADOR);
 }
 
+/** Lo que dice el jugador cuando se pregunta "¿pares?" y "¿juego?" antes de esos lances. */
+export function dichos(j: Jugada): string {
+  const siNo = (tiene: boolean): string => (tiene ? 'sí' : 'no');
+  return `pares ${siNo(clavePares(j) !== null)}${SEPARADOR}juego ${siNo(claveJuego(j) !== null)}`;
+}
+
 export function cartasDecisivas(c: CobroLance): number[] {
   const todos = c.puestoGanador === null ? c.puestosTantos : [c.puestoGanador, ...c.puestosTantos];
   return [...new Set(todos)];

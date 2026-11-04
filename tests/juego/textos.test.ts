@@ -5,6 +5,7 @@ import type { Intervencion } from '../../src/reglas/apuestas';
 import { contarMano, type LanceJugado, type ManoJugada } from '../../src/reglas/contar';
 import {
   cartasDecisivas,
+  dichos,
   etiquetaPuesto,
   explicarLance,
   lineaLance,
@@ -161,5 +162,11 @@ describe('mesa', () => {
     expect(cartasDecisivas(j)).toEqual([3]);
     expect(cartasDecisivas(p)).toEqual([0, 2]);
     expect(cartasDecisivas(g)).toEqual([0]);
+  });
+  it('dichos: lo que canta cada jugador al preguntar pares y juego', () => {
+    expect(dichos(jugada('R R 7 5'))).toBe('pares sí · juego sí');
+    expect(dichos(jugada('R C S 1'))).toBe('pares no · juego sí');
+    expect(dichos(jugada('7 7 S 4'))).toBe('pares sí · juego no');
+    expect(dichos(jugada('6 4 3 1'))).toBe('pares no · juego no');
   });
 });

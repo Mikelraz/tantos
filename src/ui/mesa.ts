@@ -2,7 +2,7 @@
 import { fuerzaRango, type Carta, type Palo, type Rango } from '../reglas/cartas';
 import type { ManoJugada } from '../reglas/contar';
 import { parejaDe } from '../reglas/cotejo';
-import { etiquetaPuesto, lineaLance, posicionEnPantalla, simbolo } from '../juego/textos';
+import { dichos, etiquetaPuesto, lineaLance, posicionEnPantalla, simbolo } from '../juego/textos';
 import { h, svg } from './dom';
 import { crearTeclado } from './teclado';
 
@@ -117,6 +117,7 @@ export function dibujarMesa(doc: Document, m: ManoJugada): Mesa {
       },
       h(doc, 'div', { class: 'cartas' }, ...cartas.map((c) => dibujarCarta(doc, c))),
       h(doc, 'span', { class: 'etiqueta' }, `${etiquetaPuesto(puesto)}${esMano ? ' · mano' : ''}`),
+      h(doc, 'span', { class: 'dichos' }, dichos(j)),
     );
   });
   const elemento = h(doc, 'div', { class: 'mesa' }, ...jugadas, h(doc, 'div', { class: 'tapete' }));

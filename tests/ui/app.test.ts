@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { rngSembrado } from '../../src/generar/rng';
 import { CLAVE_HISTORIAL } from '../../src/juego/historial';
 import type { Marca } from '../../src/juego/tanda';
-import { cartasDecisivas, explicarLance } from '../../src/juego/textos';
+import { cartasDecisivas, dichos, explicarLance } from '../../src/juego/textos';
 import { contarMano } from '../../src/reglas/contar';
 import { montarApp } from '../../src/ui/app';
 import { graficaMarcas, MARCAS_EN_GRAFICA } from '../../src/ui/grafica';
@@ -95,6 +95,17 @@ describe('interfaz', () => {
     expect(p.raiz.textContent).toContain('Mano 1 / 10');
     expect(p.app.manoActual()).not.toBeNull();
     expect(p.raiz.querySelectorAll('.carta')).toHaveLength(16);
+  });
+
+  it('cada jugador dice si tiene pares y juego', () => {
+    const p = preparar();
+    boton(p.raiz, 'Empezar tanda').click();
+    const mano = p.app.manoActual()!;
+    const vistos = [...p.raiz.querySelectorAll('.jugada')].map((e) => [
+      Number(e.getAttribute('data-puesto')),
+      e.querySelector('.dichos')?.textContent,
+    ]);
+    expect(vistos).toEqual(mano.jugadas.map((j, puesto) => [puesto, dichos(j)]));
   });
 
   it('Comprobar se activa con las dos casillas; un tercer dígito se ignora', () => {
