@@ -14,6 +14,8 @@ export function pantallaFin(
     /** Historial con esta tanda al final. */
     serie: readonly Marca[];
     alOtra: () => void;
+    /** En la tanda del día: su número y el botón de compartir. */
+    delDia: { numero: number; compartir: HTMLButtonElement } | null;
   },
 ): HTMLElement {
   const { marca } = o;
@@ -57,7 +59,7 @@ export function pantallaFin(
     doc,
     'main',
     { class: 'pantalla pantalla-fin' },
-    h(doc, 'h1', {}, 'Tanda terminada'),
+    h(doc, 'h1', {}, o.delDia ? `Tanda del día #${o.delDia.numero}` : 'Tanda terminada'),
     h(
       doc,
       'div',
@@ -68,6 +70,7 @@ export function pantallaFin(
     comparacion,
     manos,
     graficaMarcas(doc, o.serie),
-    boton(doc, 'Otra tanda', o.alOtra, 'principal'),
+    o.delDia?.compartir,
+    boton(doc, 'Otra tanda', o.alOtra, o.delDia ? 'secundario' : 'principal'),
   );
 }

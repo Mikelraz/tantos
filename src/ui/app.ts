@@ -2,6 +2,7 @@
 import { generarMano, type Nivel } from '../generar/generar';
 import type { Rng } from '../generar/rng';
 import { Cronometro } from '../juego/cronometro';
+import { diaDe, manosDelDia, numeroDelDia, tandaDelDia } from '../juego/diaria';
 import {
   cargarHistorial,
   cargarModo,
@@ -11,11 +12,11 @@ import {
   marcasDelModo,
   mejorMarca,
 } from '../juego/historial';
-import { crearMarca, esCorrecta, NIVELES_TANDA, type ResultadoMano } from '../juego/tanda';
+import { crearMarca, esCorrecta, NIVELES_TANDA, type Marca, type ResultadoMano } from '../juego/tanda';
 import { contarMano, type ManoJugada } from '../reglas/contar';
 import { boton, h } from './dom';
 import { pantallaFin } from './fin';
-import { textoMarca, tiempoCorto } from './formato';
+import { textoCompartir, textoMarca, tiempoCorto } from './formato';
 import { graficaMarcas } from './grafica';
 import { pantallaMano, type PantallaMano } from './mesa';
 import { pantallaSolucion } from './solucion';
@@ -26,7 +27,16 @@ export interface OpcionesApp {
   ahora: () => number;
   almacen: Storage | null;
   documento: Document;
+  /** La fecha de ahora, para saber qué tanda del día toca. */
+  hoy: () => Date;
+  /** La dirección de la app, que va al final del texto compartido. */
+  enlace: string;
+  /** Manda el texto al menú de compartir del sistema o, si no lo hay, lo copia. */
+  compartir: (texto: string) => Promise<ResultadoCompartir>;
 }
+
+/** `null` si no se pudo, o si se canceló el menú de compartir. */
+export type ResultadoCompartir = 'compartido' | 'copiado' | null;
 
 export interface App {
   /** La mano que está en pantalla (en la mesa o en la solución), o null fuera de una tanda. */
@@ -45,6 +55,8 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
   /** Los no queridos se cobran al momento: no entran en la cuenta del final de la mano. */
   let noQueridosCobrados = cargarModo(o.almacen);
   let resultados: ResultadoMano[] = [];
+  /** Las manos de la tanda del día, o null en una tanda libre. */
+  let delDia: { dia: string; manos: ManoJugada[] } | null = null;
   /** La pantalla de mano activa: solo en ella corre el reloj y se puede pausar. */
   let enJuego: PantallaMano | null = null;
   let capaPausa: HTMLElement | null = null;
@@ -60,9 +72,27 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
     doc.defaultView?.scrollTo?.(0, 0);
   }
 
+  /** Botón que comparte la tanda del día; si el texto se copia, lo dice. */
+  function botonCompartir(marca: Marca, clase: string): HTMLButtonElement {
+    const b = boton(
+      doc,
+      'Compartir',
+      () => {
+        void o.compartir(textoCompartir(marca, o.enlace)).then((r) => {
+          if (r === 'copiado') b.textContent = 'Copiado';
+        });
+      },
+      clase,
+    );
+    return b;
+  }
+
   function inicio(): void {
     manoEnPantalla = null;
-    const historial = marcasDelModo(cargarHistorial(o.almacen), noQueridosCobrados);
+    const todas = cargarHistorial(o.almacen);
+    const hoy = diaDe(o.hoy());
+    const jugadaHoy = tandaDelDia(todas, hoy);
+    const historial = marcasDelModo(todas, noQueridosCobrados);
     const mejor = mejorMarca(historial);
     const casilla = h(doc, 'input', {
       type: 'checkbox',
@@ -108,12 +138,34 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
             )
           : null,
         historial.length > 1 ? graficaMarcas(doc, historial) : null,
-        boton(doc, 'Empezar tanda', empezarTanda, 'principal'),
+        jugadaHoy
+          ? h(
+              doc,
+              'div',
+              { class: 'diaria-hecha' },
+              h(
+                doc,
+                'p',
+                {},
+                `Tanda del día #${numeroDelDia(hoy)}: `,
+                h(doc, 'b', { 'data-dato': 'diaria' }, textoMarca(jugadaHoy)),
+              ),
+              botonCompartir(jugadaHoy, 'secundario'),
+            )
+          : boton(doc, 'Tanda del día', () => empezarDelDia(hoy), 'principal'),
+        boton(doc, 'Empezar tanda', empezarTanda, jugadaHoy ? 'principal' : 'secundario'),
       ),
     );
   }
 
   function empezarTanda(): void {
+    delDia = null;
+    resultados = [];
+    siguienteMano(false);
+  }
+
+  function empezarDelDia(dia: string): void {
+    delDia = { dia, manos: manosDelDia(dia) };
     resultados = [];
     siguienteMano(false);
   }
@@ -125,7 +177,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
       fin();
       return;
     }
-    const mano = generarMano(nivel, o.rng);
+    const mano = delDia ? delDia.manos[i]! : generarMano(nivel, o.rng);
     manoEnPantalla = mano;
     const pantalla = pantallaMano(doc, {
       numero: i + 1,
@@ -172,7 +224,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
   function fin(): void {
     manoEnPantalla = null;
     const previo = marcasDelModo(cargarHistorial(o.almacen), noQueridosCobrados);
-    const marca = crearMarca(resultados, new Date(), noQueridosCobrados);
+    const marca = crearMarca(resultados, new Date(), noQueridosCobrados, delDia?.dia);
     const nuevaMejor = o.almacen !== null && esNuevaMejor(marca, previo);
     guardarMarca(marca, o.almacen);
     mostrar(
@@ -182,6 +234,9 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
         mejorPrevia: mejorMarca(previo),
         serie: [...previo, marca],
         alOtra: empezarTanda,
+        delDia: marca.dia
+          ? { numero: numeroDelDia(marca.dia), compartir: botonCompartir(marca, 'principal') }
+          : null,
       }),
     );
   }

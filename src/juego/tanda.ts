@@ -19,6 +19,8 @@ export interface Marca {
   manos: ResultadoMano[];
   /** Tanda jugada con los no queridos cobrados al momento. Las marcas antiguas no lo llevan. */
   noQueridosCobrados?: boolean;
+  /** Si es la tanda del día, su fecha (`AAAA-MM-DD`). Las tandas libres no lo llevan. */
+  dia?: string;
 }
 
 export function parejasFalladas(resp: [number, number], d: Desglose): Pareja[] {
@@ -32,13 +34,19 @@ export function esCorrecta(resp: [number, number], d: Desglose): boolean {
   return parejasFalladas(resp, d).length === 0;
 }
 
-export function crearMarca(manos: ResultadoMano[], fecha: Date, noQueridosCobrados: boolean): Marca {
+export function crearMarca(
+  manos: ResultadoMano[],
+  fecha: Date,
+  noQueridosCobrados: boolean,
+  dia?: string,
+): Marca {
   return {
     fecha: fecha.toISOString(),
     fallos: manos.filter((m) => !m.acierto).length,
     decimas: manos.reduce((s, m) => s + m.decimas, 0),
     manos,
     noQueridosCobrados,
+    ...(dia ? { dia } : {}),
   };
 }
 

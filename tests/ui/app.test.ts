@@ -5,7 +5,9 @@ import { CLAVE_HISTORIAL, CLAVE_MODO } from '../../src/juego/historial';
 import type { Marca } from '../../src/juego/tanda';
 import { cartasDecisivas, dichos, explicarLance } from '../../src/juego/textos';
 import { contarMano } from '../../src/reglas/contar';
-import { montarApp } from '../../src/ui/app';
+import { montarApp, type ResultadoCompartir } from '../../src/ui/app';
+import { manosDelDia } from '../../src/juego/diaria';
+import { textoCompartir } from '../../src/ui/formato';
 import { graficaMarcas, MARCAS_EN_GRAFICA } from '../../src/ui/grafica';
 
 function almacenFalso(): Storage & { datos: Record<string, string> } {
@@ -17,12 +19,31 @@ function almacenFalso(): Storage & { datos: Record<string, string> } {
   } as unknown as Storage & { datos: Record<string, string> };
 }
 
-function preparar(almacen: Storage | null = almacenFalso()) {
+const ENLACE = 'https://mikelraz.github.io/tantos/';
+
+function preparar(
+  almacen: Storage | null = almacenFalso(),
+  o: { hoy?: Date; compartir?: (texto: string) => Promise<ResultadoCompartir> } = {},
+) {
   let t = 0;
   const raiz = document.createElement('div');
   document.body.replaceChildren(raiz);
-  const app = montarApp(raiz, { rng: rngSembrado(7), ahora: () => t, almacen, documento: document });
-  return { raiz, app, avanzar: (ms: number) => void (t += ms) };
+  const compartidos: string[] = [];
+  const app = montarApp(raiz, {
+    rng: rngSembrado(7),
+    ahora: () => t,
+    almacen,
+    documento: document,
+    hoy: () => o.hoy ?? new Date(2026, 10, 7, 20, 0),
+    enlace: ENLACE,
+    compartir:
+      o.compartir ??
+      ((texto) => {
+        compartidos.push(texto);
+        return Promise.resolve('compartido');
+      }),
+  });
+  return { raiz, app, compartidos, avanzar: (ms: number) => void (t += ms) };
 }
 
 type Preparado = ReturnType<typeof preparar>;
@@ -411,5 +432,74 @@ describe('no queridos cobrados al momento', () => {
     }
     expect(p.raiz.querySelector('.record .antes')?.textContent).toBe('antes: 0 fallos · 1:39,9');
     expect(p.raiz.querySelectorAll('svg .punto')).toHaveLength(2);
+  });
+});
+
+describe('tanda del día', () => {
+  const HOY = '2026-11-07';
+
+  function jugarDelDia(p: Preparado): void {
+    boton(p.raiz, 'Tanda del día').click();
+    for (let n = 1; n <= 10; n++) {
+      p.avanzar(1000);
+      responder(p, n !== 3);
+      if (n === 3) siguiente(p);
+    }
+  }
+
+  it('reparte las manos del día, las mismas para todos', () => {
+    const p = preparar();
+    boton(p.raiz, 'Tanda del día').click();
+    const delDia = manosDelDia(HOY);
+    for (let n = 0; n < 10; n++) {
+      expect(p.app.manoActual()).toEqual(delDia[n]);
+      responder(p, true);
+    }
+  });
+
+  it('al acabar se guarda con su día y se comparte el texto de Wordle', async () => {
+    const almacen = almacenFalso();
+    const p = preparar(almacen);
+    jugarDelDia(p);
+    const [marca] = marcasGuardadas(almacen);
+    expect(marca?.dia).toBe(HOY);
+    expect(p.raiz.querySelector('h1')?.textContent).toBe('Tanda del día #3');
+    boton(p.raiz, 'Compartir').click();
+    await Promise.resolve();
+    expect(p.compartidos).toEqual([textoCompartir(marca!, ENLACE)]);
+    expect(p.compartidos[0]).toContain('🟩🟩🟥🟩');
+  });
+
+  it('una vez jugada, el inicio enseña el resultado y no deja repetirla hasta mañana', () => {
+    const almacen = almacenFalso();
+    jugarDelDia(preparar(almacen));
+
+    const p = preparar(almacen);
+    expect(p.raiz.querySelector('button.principal')?.textContent).toBe('Empezar tanda');
+    expect([...p.raiz.querySelectorAll('button')].some((b) => b.textContent === 'Tanda del día')).toBe(false);
+    expect(dato(p.raiz, 'diaria')).toBe('1 fallo · 0:10,0');
+    expect(boton(p.raiz, 'Compartir')).toBeTruthy();
+
+    const manana = preparar(almacen, { hoy: new Date(2026, 10, 8, 9, 0) });
+    expect(boton(manana.raiz, 'Tanda del día')).toBeTruthy();
+    expect(dato(manana.raiz, 'diaria')).toBeNull();
+  });
+
+  it('si no se puede compartir y se copia, el botón lo dice', async () => {
+    const p = preparar(almacenFalso(), { compartir: () => Promise.resolve('copiado') });
+    jugarDelDia(p);
+    const b = boton(p.raiz, 'Compartir');
+    b.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(b.textContent).toBe('Copiado');
+  });
+
+  it('las tandas libres no muestran Compartir', () => {
+    const p = preparar(null);
+    boton(p.raiz, 'Empezar tanda').click();
+    for (let n = 1; n <= 10; n++) responder(p, true);
+    expect(p.raiz.querySelector('h1')?.textContent).toBe('Tanda terminada');
+    expect([...p.raiz.querySelectorAll('button')].some((b) => b.textContent === 'Compartir')).toBe(false);
   });
 });

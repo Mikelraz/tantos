@@ -168,6 +168,19 @@ tr:focus-visible {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
+/* Botón secundario: mismo tamaño que el principal, sin el oro. */
+.secundario {
+  min-height: 52px;
+  border-radius: var(--radio);
+  background: var(--tecla);
+  font-size: var(--t-dest);
+  font-weight: 700;
+}
+
+.secundario:active {
+  background: var(--tecla-activa);
+}
+
 /* Desactivado se ve neutro: el oro a medias sobre verde parecía otro color, no un estado. */
 .comprobar:disabled {
   background: var(--tecla);
@@ -210,6 +223,21 @@ tr:focus-visible {
 
 .reglas li + li {
   margin-top: 6px;
+}
+
+.diaria-hecha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radio);
+  background: var(--panel);
+  text-align: center;
+}
+
+.diaria-hecha p {
+  margin: 0;
+  font-size: var(--t-dest);
 }
 
 .pantalla-inicio .mejor {
