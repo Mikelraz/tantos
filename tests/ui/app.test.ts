@@ -149,7 +149,7 @@ describe('interfaz', () => {
     const [a, b] = responder(p, false);
 
     expect(p.raiz.querySelector('.veredicto')?.textContent).toBe(
-      `Fallo · tú: ${a} – ${b} · era: ${x} – ${y}`,
+      `Fallo: has puesto ${a} – ${b} y era ${x} – ${y}`,
     );
     expect(boton(p.raiz, 'Siguiente')).toBeTruthy();
     expect(p.raiz.querySelectorAll('.carta')).toHaveLength(16);

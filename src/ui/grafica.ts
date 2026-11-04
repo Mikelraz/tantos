@@ -68,22 +68,16 @@ export function graficaMarcas(doc: Document, todas: readonly Marca[]): HTMLEleme
     doc,
     'figure',
     { class: 'evolucion' },
-    h(
-      doc,
-      'figcaption',
-      {},
-      h(doc, 'span', {}, 'Evolución del tiempo'),
-      h(doc, 'span', { class: 'sentido' }, 'más abajo, más rápido'),
-    ),
+    h(doc, 'figcaption', {}, 'Evolución del tiempo'),
     grafica,
+    // Leyenda y sentido del eje en una línea propia, cada cosa en su bloque, en vez de apretadas en el título.
     h(
       doc,
       'p',
       { class: 'leyenda' },
-      h(doc, 'span', { class: 'muestra limpia' }),
-      ' 0 fallos ',
-      h(doc, 'span', { class: 'muestra' }),
-      ' con fallos',
+      h(doc, 'span', { class: 'clave' }, h(doc, 'span', { class: 'muestra limpia' }), '0 fallos'),
+      h(doc, 'span', { class: 'clave' }, h(doc, 'span', { class: 'muestra' }), 'con fallos'),
+      h(doc, 'span', { class: 'sentido' }, 'Más abajo, más rápido'),
     ),
   );
 }

@@ -116,7 +116,14 @@ export function dibujarMesa(doc: Document, m: ManoJugada): Mesa {
         'data-puesto': String(puesto),
       },
       h(doc, 'div', { class: 'cartas' }, ...cartas.map((c) => dibujarCarta(doc, c))),
-      h(doc, 'span', { class: 'etiqueta' }, `${etiquetaPuesto(puesto)}${esMano ? ' · mano' : ''}`),
+      // La mano va en su propia ficha, como el botón del repartidor en el póquer: la etiqueta conserva el color de la pareja.
+      h(
+        doc,
+        'span',
+        { class: 'etiquetas' },
+        h(doc, 'span', { class: 'etiqueta' }, etiquetaPuesto(puesto)),
+        esMano ? h(doc, 'span', { class: 'ficha-mano' }, 'mano') : null,
+      ),
       h(doc, 'span', { class: 'dichos' }, dichos(j)),
     );
   });
@@ -154,13 +161,15 @@ function dibujarLances(doc: Document, m: ManoJugada): HTMLElement {
     ...m.lances.map((l) => {
       const linea = lineaLance(l);
       const corte = linea.indexOf(': ');
+      const envites = linea.slice(corte + 2);
+      // La columna ya separa nombre y envites: sin los dos puntos.
       return h(
         doc,
         'li',
-        {},
-        h(doc, 'span', { class: 'nombre-lance' }, linea.slice(0, corte + 1)),
+        { class: envites === 'sin envite' ? 'sin-envite' : '' },
+        h(doc, 'span', { class: 'nombre-lance' }, linea.slice(0, corte)),
         ' ',
-        lineaConColores(doc, linea.slice(corte + 2)),
+        lineaConColores(doc, envites),
       );
     }),
   );
