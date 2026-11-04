@@ -4,6 +4,7 @@ import type { ManoJugada } from '../reglas/contar';
 import { parejaDe } from '../reglas/cotejo';
 import { dichos, etiquetaPuesto, lineaLance, posicionEnPantalla, simbolo } from '../juego/textos';
 import { h, svg } from './dom';
+import { dibujarFigura, esFigura } from './figuras';
 import { crearTeclado } from './teclado';
 
 const NOMBRE_PALO: Record<Palo, string> = { 0: 'oros', 1: 'copas', 2: 'espadas', 3: 'bastos' };
@@ -13,7 +14,7 @@ const NOMBRE_RANGO: Record<Rango, string> = {
 };
 
 /** Dibujo propio de cada palo (viewBox 20×20). */
-function iconoPalo(doc: Document, palo: Palo): SVGElement {
+function iconoPalo(doc: Document, palo: Palo, clase = 'palo'): SVGElement {
   const formas: Record<Palo, () => SVGElement[]> = {
     0: () => [
       svg(doc, 'circle', { cx: 10, cy: 10, r: 8.4, class: 'relleno' }),
@@ -45,7 +46,7 @@ function iconoPalo(doc: Document, palo: Palo): SVGElement {
   return svg(
     doc,
     'svg',
-    { viewBox: '0 0 20 20', class: 'palo', 'aria-hidden': 'true', focusable: 'false' },
+    { viewBox: '0 0 20 20', class: clase, 'aria-hidden': 'true', focusable: 'false' },
     ...formas[palo](),
   );
 }
@@ -81,18 +82,21 @@ function marco(doc: Document, palo: Palo): SVGElement {
 }
 
 function dibujarCarta(doc: Document, c: Carta): HTMLElement {
+  const figura = esFigura(c.rango);
   return h(
     doc,
     'span',
     {
-      class: `carta palo-${c.palo}`,
+      class: `carta palo-${c.palo}${figura ? ' con-figura' : ''}`,
       role: 'img',
       'aria-label': `${NOMBRE_RANGO[c.rango]} de ${NOMBRE_PALO[c.palo]}`,
     },
     marco(doc, c.palo),
     // Un solo número por carta: repetido boca abajo dobla lo que hay que leer.
+    // Las figuras se pintan de cuerpo entero con el palo en la mano; el número sigue en la esquina.
+    figura ? dibujarFigura(doc, c.rango, iconoPalo(doc, c.palo, 'palo-en-mano')) : null,
     h(doc, 'span', { class: 'indice', 'aria-hidden': 'true' }, simbolo(c)),
-    iconoPalo(doc, c.palo),
+    figura ? null : iconoPalo(doc, c.palo),
   );
 }
 
