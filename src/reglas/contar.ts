@@ -25,7 +25,19 @@ export interface ManoJugada {
   lances: LanceJugado[];
 }
 
-/** `apuesta`: piedras de envite o paso. `tantos`: los de las cartas. Van separados a propósito. */
+export interface OpcionesCuenta {
+  /**
+   * La piedra de un "no quiero" (envite, subida u órdago) se cobra en el momento, como en muchas
+   * mesas: al final de la mano ya no se cuenta. Los tantos de las cartas sí.
+   */
+  noQueridosCobrados?: boolean;
+}
+
+/**
+ * `apuesta`: piedras de envite o paso que se cuentan al final. `tantos`: los de las cartas. Van
+ * separados a propósito. `cobrado`: piedras del "no quiero" ya cobradas en el momento (solo con
+ * `noQueridosCobrados`; si no, siempre 0).
+ */
 export interface CobroLance {
   lance: Lance;
   resultado: ResultadoApuesta;
@@ -33,6 +45,7 @@ export interface CobroLance {
   /** Solo tiene valor cuando decidió el cotejo. */
   puestoGanador: number | null;
   apuesta: [number, number];
+  cobrado: [number, number];
   tantos: [number, number];
   /** Asientos cuyos pares o juego cobraron. */
   puestosTantos: number[];
@@ -59,7 +72,11 @@ function tantosDeJugada(lance: Lance, j: Jugada): number {
   return 0;
 }
 
-function cobrarLance(m: ManoJugada, { lance, historial }: LanceJugado): CobroLance {
+function cobrarLance(
+  m: ManoJugada,
+  { lance, historial }: LanceJugado,
+  noQueridosCobrados: boolean,
+): CobroLance {
   const quienes = participantes(lance, m.jugadas, m.mano);
   const resultado = reproducirLance(quienes, historial);
 
@@ -95,6 +112,7 @@ function cobrarLance(m: ManoJugada, { lance, historial }: LanceJugado): CobroLan
       ganador,
       puestoGanador,
       apuesta: [0, 0],
+      cobrado: [0, 0],
       tantos: [0, 0],
       puestosTantos: [],
     };
@@ -108,23 +126,25 @@ function cobrarLance(m: ManoJugada, { lance, historial }: LanceJugado): CobroLan
     puestosTantos = quienes.filter((s) => parejaDe(s) === ganador);
     tantos = puestosTantos.reduce((a, s) => a + tantosDeJugada(lance, m.jugadas[s] as Jugada), 0);
   }
+  const cobradoYa = noQueridosCobrados && resultado.resolucion === 'no_querido';
   return {
     lance,
     resultado,
     ganador,
     puestoGanador,
-    apuesta: paraPareja(ganador, puesta),
+    apuesta: paraPareja(ganador, cobradoYa ? 0 : puesta),
+    cobrado: paraPareja(ganador, cobradoYa ? puesta : 0),
     tantos: paraPareja(ganador, tantos),
     puestosTantos,
   };
 }
 
-export function contarMano(m: ManoJugada): Desglose {
+export function contarMano(m: ManoJugada, o: OpcionesCuenta = {}): Desglose {
   const esperados = lancesDeLaMano(m.jugadas);
   if (m.lances.length !== esperados.length || m.lances.some((l, i) => l.lance !== esperados[i])) {
     throw new Error(`los lances de la mano deben ser ${esperados.join(', ')}`);
   }
-  const lances = m.lances.map((l) => cobrarLance(m, l));
+  const lances = m.lances.map((l) => cobrarLance(m, l, o.noQueridosCobrados ?? false));
   const total: [number, number] = [0, 0];
   for (const c of lances) {
     for (const p of [0, 1] as const) total[p] += c.apuesta[p] + c.tantos[p];

@@ -27,7 +27,8 @@ Es un proyecto independiente de `ordago` (el proyecto de investigación de estra
 - El marcador de la partida (piedras acumuladas, amarrakos, vacas). Solo se cuentan los tantos de
   **esa** mano.
 - Multijugador, cuentas, rankings online, sincronización entre dispositivos.
-- Variantes de reglas configurables. La app juega con las reglas de una mesa (ver "Reglas").
+- Variantes de reglas configurables. La app juega con las reglas de una mesa (ver "Reglas") La única
+  excepción es el modo "No queridos cobrados al momento" (ver "Apuestas").
 - Publicación en tiendas de apps.
 
 ## Anti-objetivos (fallaría aunque funcione técnicamente)
@@ -152,6 +153,15 @@ no se quiere, quien subió cobra lo que había **antes** de su subida (p. ej. "N
 Ellos 5 más, Nosotros no quiero" → Ellos cobra 2). Ver `betting.py` (`pendiente` / `valor_rechazo`)
 para la mecánica exacta. Las apuestas nunca superan lo que vale la partida (40); con manos que
 empiezan 0–0 eso no limita casi nada.
+
+**Modo "No queridos cobrados al momento"** (añadido el 2026-11-04 a petición del usuario): en
+muchas mesas, la pareja que gana un lance por un "no quiero" (envite, subida u órdago) coge las
+piedras en ese momento, y al final de la mano ya no se cuentan. Con el interruptor de la pantalla
+de inicio activado, esas piedras quedan fuera del total que se pide; los tantos de pares y juego, y
+el punto, de esa pareja se siguen cobrando al final. La mesa lo recuerda con el aviso "Los no
+queridos ya están cobrados" y la solución lo explica como "no quiero N · ya cobrado". El interruptor
+se recuerda en el dispositivo; cada tanda guarda su modo, y la mejor marca y la gráfica solo
+comparan tandas del mismo modo (las anteriores a este cambio cuentan como modo desactivado).
 
 ## El juego
 

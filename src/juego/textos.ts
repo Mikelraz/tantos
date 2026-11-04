@@ -160,9 +160,11 @@ export function explicarLance(c: CobroLance, m: ManoJugada): string {
     case 'querido':
       partes.push(`envite querido ${monto}`);
       break;
-    case 'no_querido':
-      partes.push(`no quiero → ${monto}`);
+    case 'no_querido': {
+      const cobrado = c.cobrado[ganador];
+      partes.push(cobrado > 0 ? `no quiero ${cobrado}${SEPARADOR}ya cobrado` : `no quiero → ${monto}`);
       break;
+    }
     case 'sin_rival':
       partes.push(`solo ${NOMBRE_PAREJA[ganador]}`);
       break;

@@ -47,7 +47,13 @@ describe('tanda', () => {
       { nivel: 2, acierto: false, decimas: 200 },
       { nivel: 3, acierto: false, decimas: 80 },
     ];
-    const m = crearMarca(manos, new Date('2026-11-03T10:00:00.000Z'));
-    expect(m).toEqual({ fecha: '2026-11-03T10:00:00.000Z', fallos: 2, decimas: 400, manos });
+    const m = crearMarca(manos, new Date('2026-11-03T10:00:00.000Z'), false);
+    expect(m).toEqual({
+      fecha: '2026-11-03T10:00:00.000Z',
+      fallos: 2,
+      decimas: 400,
+      manos,
+      noQueridosCobrados: false,
+    });
   });
 });

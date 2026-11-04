@@ -2,7 +2,15 @@
 import { generarMano, type Nivel } from '../generar/generar';
 import type { Rng } from '../generar/rng';
 import { Cronometro } from '../juego/cronometro';
-import { cargarHistorial, esNuevaMejor, guardarMarca, mejorMarca } from '../juego/historial';
+import {
+  cargarHistorial,
+  cargarModo,
+  esNuevaMejor,
+  guardarMarca,
+  guardarModo,
+  marcasDelModo,
+  mejorMarca,
+} from '../juego/historial';
 import { crearMarca, esCorrecta, NIVELES_TANDA, type ResultadoMano } from '../juego/tanda';
 import { contarMano, type ManoJugada } from '../reglas/contar';
 import { boton, h } from './dom';
@@ -34,6 +42,8 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
   const totalManos = NIVELES_TANDA.length;
 
   let manoEnPantalla: ManoJugada | null = null;
+  /** Los no queridos se cobran al momento: no entran en la cuenta del final de la mano. */
+  let noQueridosCobrados = cargarModo(o.almacen);
   let resultados: ResultadoMano[] = [];
   /** La pantalla de mano activa: solo en ella corre el reloj y se puede pausar. */
   let enJuego: PantallaMano | null = null;
@@ -52,8 +62,20 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
 
   function inicio(): void {
     manoEnPantalla = null;
-    const historial = cargarHistorial(o.almacen);
+    const historial = marcasDelModo(cargarHistorial(o.almacen), noQueridosCobrados);
     const mejor = mejorMarca(historial);
+    const casilla = h(doc, 'input', {
+      type: 'checkbox',
+      role: 'switch',
+      'data-ajuste': 'noQueridosCobrados',
+    });
+    casilla.checked = noQueridosCobrados;
+    casilla.addEventListener('change', () => {
+      noQueridosCobrados = casilla.checked;
+      guardarModo(noQueridosCobrados, o.almacen);
+      // La mejor marca y la gráfica son las del modo elegido.
+      inicio();
+    });
     mostrar(
       h(
         doc,
@@ -68,6 +90,13 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
           h(doc, 'li', {}, `${totalManos} manos, de más fáciles a más difíciles.`),
           h(doc, 'li', {}, 'Gana quien menos falla; a igualdad de fallos, quien tarda menos.'),
           h(doc, 'li', {}, 'Cuatro reyes, reglamento navarro.'),
+        ),
+        h(
+          doc,
+          'label',
+          { class: 'interruptor' },
+          casilla,
+          h(doc, 'span', { class: 'texto' }, 'No queridos cobrados al momento'),
         ),
         mejor
           ? h(
@@ -103,6 +132,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
       total: totalManos,
       mano,
       trasAcierto,
+      noQueridosCobrados,
       alComprobar: (respuesta) => comprobar(mano, nivel, respuesta),
     });
     mostrar(pantalla.elemento);
@@ -117,7 +147,7 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
   function comprobar(mano: ManoJugada, nivel: Nivel, respuesta: [number, number]): void {
     if (capaPausa !== null) return;
     const decimas = cronometro.detener();
-    const desglose = contarMano(mano);
+    const desglose = contarMano(mano, { noQueridosCobrados });
     const acierto = esCorrecta(respuesta, desglose);
     resultados.push({ nivel, acierto, decimas });
     if (acierto) {
@@ -141,8 +171,8 @@ export function montarApp(raiz: HTMLElement, o: OpcionesApp): App {
 
   function fin(): void {
     manoEnPantalla = null;
-    const previo = cargarHistorial(o.almacen);
-    const marca = crearMarca(resultados, new Date());
+    const previo = marcasDelModo(cargarHistorial(o.almacen), noQueridosCobrados);
+    const marca = crearMarca(resultados, new Date(), noQueridosCobrados);
     const nuevaMejor = o.almacen !== null && esNuevaMejor(marca, previo);
     guardarMarca(marca, o.almacen);
     mostrar(

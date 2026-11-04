@@ -3,10 +3,13 @@ import {
   CLAVE_HISTORIAL,
   cargarHistorial,
   esNuevaMejor,
+  cargarModo,
   guardarMarca,
+  guardarModo,
+  marcasDelModo,
   mejorMarca,
 } from '../../src/juego/historial';
-import type { Marca } from '../../src/juego/tanda';
+import { crearMarca, type Marca } from '../../src/juego/tanda';
 
 const marca = (fallos: number, decimas: number, fecha = '2026-11-03T10:00:00.000Z'): Marca => ({
   fecha,
@@ -79,5 +82,29 @@ describe('historial', () => {
     expect(esNuevaMejor(marca(0, 700), h)).toBe(true);
     expect(esNuevaMejor(marca(0, 800), h)).toBe(false);
     expect(esNuevaMejor(marca(1, 100), h)).toBe(false);
+  });
+
+  it('cada marca guarda su modo; las de antes del modo cuentan como no cobrados', () => {
+    const fecha = new Date('2026-11-04T10:00:00.000Z');
+    const cobrados = crearMarca([], fecha, true);
+    const normal = crearMarca([], fecha, false);
+    expect(cobrados.noQueridosCobrados).toBe(true);
+    const antigua = marca(0, 100);
+    const h = [antigua, cobrados, normal];
+    expect(marcasDelModo(h, true)).toEqual([cobrados]);
+    expect(marcasDelModo(h, false)).toEqual([antigua, normal]);
+  });
+
+  it('el modo se recuerda; por defecto y sin almacén está desactivado', () => {
+    const a = almacenFalso();
+    expect(cargarModo(a)).toBe(false);
+    guardarModo(true, a);
+    expect(cargarModo(a)).toBe(true);
+    guardarModo(false, a);
+    expect(cargarModo(a)).toBe(false);
+    expect(cargarModo(null)).toBe(false);
+    expect(cargarModo(almacenRoto)).toBe(false);
+    expect(() => guardarModo(true, null)).not.toThrow();
+    expect(() => guardarModo(true, almacenRoto)).not.toThrow();
   });
 });

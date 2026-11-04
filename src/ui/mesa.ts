@@ -190,6 +190,7 @@ export function pantallaMano(
     total: number;
     mano: ManoJugada;
     trasAcierto: boolean;
+    noQueridosCobrados: boolean;
     alComprobar: (respuesta: [number, number]) => void;
   },
 ): PantallaMano {
@@ -206,6 +207,7 @@ export function pantallaMano(
     cabecera,
     mesa.elemento,
     dibujarLances(doc, o.mano),
+    o.noQueridosCobrados ? h(doc, 'p', { class: 'aviso-cobrados' }, 'Los no queridos ya están cobrados') : null,
     crearTeclado(doc, o.alComprobar),
   );
   return { elemento, reloj, tapar: (si) => mesa.tapar(si) };

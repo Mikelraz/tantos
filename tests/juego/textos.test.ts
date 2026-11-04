@@ -85,6 +85,10 @@ describe('explicarLance', () => {
     expect(explicarLance(p, mano)).toBe('solo Nosotros · pareja de reyes 1 + pareja de sietes 1');
     expect(explicarLance(j, mano)).toBe('31 gana a 32 · envite querido 2 · 31 vale 3');
   });
+  it('con los no queridos cobrados, el no quiero se explica como ya cobrado', () => {
+    const cobrada = contarMano(mano, { noQueridosCobrados: true }).lances[1] as typeof g;
+    expect(explicarLance(cobrada, mano)).toBe('no quiero 1 · ya cobrado');
+  });
   it('la chica se compara de menor a mayor', () => {
     const m: ManoJugada = { ...mano, lances: [pasan('grande'), pasan('chica'), l('pares'), l('juego', env(0, 2), quiero(3))] };
     expect(explicarLance(contarMano(m).lances[1] as typeof g, m)).toBe('1 4 10 11 gana a 4 7 7 10 · en paso 1');

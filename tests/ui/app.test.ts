@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it } from 'vitest';
 import { rngSembrado } from '../../src/generar/rng';
-import { CLAVE_HISTORIAL } from '../../src/juego/historial';
+import { CLAVE_HISTORIAL, CLAVE_MODO } from '../../src/juego/historial';
 import type { Marca } from '../../src/juego/tanda';
 import { cartasDecisivas, dichos, explicarLance } from '../../src/juego/textos';
 import { contarMano } from '../../src/reglas/contar';
@@ -319,5 +319,97 @@ describe('gráfica', () => {
     expect(cy(-2)).toBeGreaterThan(cy(-1)); // 100 décimas, más rápida: más abajo que 500.
     expect(cy(0)).toBeLessThan(cy(-1));
     expect(puntos.at(-2)?.classList.contains('limpia')).toBe(false);
+  });
+});
+
+describe('no queridos cobrados al momento', () => {
+  const interruptor = (raiz: HTMLElement) => {
+    const e = raiz.querySelector<HTMLInputElement>('input[data-ajuste="noQueridosCobrados"]');
+    if (!e) throw new Error('no hay interruptor');
+    return e;
+  };
+  const activar = (raiz: HTMLElement) => {
+    const e = interruptor(raiz);
+    e.checked = true;
+    e.dispatchEvent(new Event('change'));
+  };
+  const totalCobrados = ({ app }: Preparado): [number, number] =>
+    contarMano(app.manoActual()!, { noQueridosCobrados: true }).total;
+  const responderCobrados = (p: Preparado): void => {
+    teclear(p.raiz, totalCobrados(p));
+    boton(p.raiz, 'Comprobar').click();
+  };
+
+  it('el interruptor empieza apagado y se recuerda al volver a abrir', () => {
+    const almacen = almacenFalso();
+    const p = preparar(almacen);
+    expect(interruptor(p.raiz).checked).toBe(false);
+    expect(interruptor(p.raiz).closest('label')?.textContent).toContain('No queridos cobrados al momento');
+    activar(p.raiz);
+    expect(almacen.getItem(CLAVE_MODO)).toBe('1');
+    expect(interruptor(preparar(almacen).raiz).checked).toBe(true);
+  });
+
+  it('el aviso de la mesa solo aparece con el modo activo', () => {
+    const p = preparar();
+    boton(p.raiz, 'Empezar tanda').click();
+    expect(p.raiz.querySelector('.aviso-cobrados')).toBeNull();
+    const q = preparar();
+    activar(q.raiz);
+    boton(q.raiz, 'Empezar tanda').click();
+    expect(q.raiz.querySelector('.aviso-cobrados')?.textContent).toBe('Los no queridos ya están cobrados');
+  });
+
+  it('con el modo activo se piden los tantos sin las piedras del no quiero', () => {
+    const almacen = almacenFalso();
+    const p = preparar(almacen);
+    activar(p.raiz);
+    boton(p.raiz, 'Empezar tanda').click();
+    let distintas = 0;
+    for (let n = 1; n <= 10; n++) {
+      const m = p.app.manoActual()!;
+      if (contarMano(m).total.join() !== totalCobrados(p).join()) distintas++;
+      responderCobrados(p);
+    }
+    // La tanda tiene manos donde el modo cambia la cuenta, y todas se dan por buenas.
+    expect(distintas).toBeGreaterThan(0);
+    expect(dato(p.raiz, 'fallos')).toBe('0');
+    expect(marcasGuardadas(almacen)[0]?.noQueridosCobrados).toBe(true);
+  });
+
+  it('la solución cuenta sin la piedra ya cobrada', () => {
+    const p = preparar();
+    activar(p.raiz);
+    boton(p.raiz, 'Empezar tanda').click();
+    // Avanza acertando hasta una mano donde el modo cambie la cuenta.
+    while (contarMano(p.app.manoActual()!).total.join() === totalCobrados(p).join()) responderCobrados(p);
+    const [x, y] = totalCobrados(p);
+    teclear(p.raiz, [x + 1, y]);
+    boton(p.raiz, 'Comprobar').click();
+    expect(p.raiz.querySelector('.total .col-0')?.textContent).toBe(String(x));
+    expect(p.raiz.querySelector('.total .col-1')?.textContent).toBe(String(y));
+    expect(p.raiz.querySelector('.desglose')?.textContent).toContain('ya cobrado');
+  });
+
+  it('la mejor marca y la gráfica solo muestran las tandas del modo activo', () => {
+    const almacen = almacenFalso();
+    const normal = { fecha: '2026-11-01T10:00:00.000Z', fallos: 0, decimas: 754, manos: [] };
+    const cobrados = { ...normal, decimas: 999, noQueridosCobrados: true };
+    almacen.setItem(CLAVE_HISTORIAL, JSON.stringify([normal, normal, cobrados]));
+    const p = preparar(almacen);
+    expect(dato(p.raiz, 'mejor')).toBe('0 fallos · 1:15,4');
+    expect(p.raiz.querySelectorAll('svg .punto')).toHaveLength(2);
+    activar(p.raiz);
+    expect(dato(p.raiz, 'mejor')).toBe('0 fallos · 1:39,9');
+    expect(p.raiz.querySelectorAll('svg .punto')).toHaveLength(0);
+
+    // Al terminar una tanda cobrada se compara solo con las cobradas.
+    boton(p.raiz, 'Empezar tanda').click();
+    for (let n = 1; n <= 10; n++) {
+      p.avanzar(2000);
+      responderCobrados(p);
+    }
+    expect(p.raiz.querySelector('.record .antes')?.textContent).toBe('antes: 0 fallos · 1:39,9');
+    expect(p.raiz.querySelectorAll('svg .punto')).toHaveLength(2);
   });
 });

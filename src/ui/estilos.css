@@ -192,6 +192,64 @@ tr:focus-visible {
   font-size: 17px;
 }
 
+/* Interruptor: un input checkbox de verdad (accesible) pintado como un deslizador. */
+.interruptor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radio);
+  background: var(--panel);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.interruptor input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  position: relative;
+  width: 46px;
+  height: 28px;
+  margin: 0;
+  border-radius: 14px;
+  background: var(--tecla);
+  border: 1px solid var(--linea);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.interruptor input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--texto);
+  transition: transform 0.15s;
+}
+
+.interruptor input:checked {
+  background: var(--oro);
+  border-color: var(--oro);
+}
+
+.interruptor input:checked::after {
+  transform: translateX(18px);
+  background: var(--oro-texto);
+}
+
+.interruptor input:focus-visible {
+  outline: 2px solid var(--resalte);
+  outline-offset: 2px;
+}
+
+.interruptor .texto {
+  font-size: 16px;
+}
+
 /* ---- Barra superior ---- */
 
 .barra {
@@ -636,6 +694,13 @@ tr:focus-visible {
 
 .pista {
   margin: -4px 0 -4px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--suave);
+}
+
+.aviso-cobrados {
+  margin: -6px 0 -4px;
   font-size: 12.5px;
   text-align: center;
   color: var(--suave);

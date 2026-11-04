@@ -1,6 +1,7 @@
 import { compararMarcas, type Marca } from './tanda';
 
 export const CLAVE_HISTORIAL = 'tantos.historial.v1';
+export const CLAVE_MODO = 'tantos.noQueridosCobrados.v1';
 
 function esMarca(x: unknown): x is Marca {
   if (typeof x !== 'object' || x === null) return false;
@@ -44,4 +45,28 @@ export function mejorMarca(h: Marca[]): Marca | null {
 export function esNuevaMejor(m: Marca, h: Marca[]): boolean {
   const mejor = mejorMarca(h);
   return mejor === null || compararMarcas(m, mejor) < 0;
+}
+
+/** Las marcas de un modo: las de cada modo no son comparables entre sí. */
+export function marcasDelModo(h: Marca[], noQueridosCobrados: boolean): Marca[] {
+  return h.filter((m) => (m.noQueridosCobrados ?? false) === noQueridosCobrados);
+}
+
+/** Si los no queridos se cobran al momento. Desactivado salvo que se haya elegido. */
+export function cargarModo(almacen: Storage | null): boolean {
+  if (!almacen) return false;
+  try {
+    return almacen.getItem(CLAVE_MODO) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function guardarModo(noQueridosCobrados: boolean, almacen: Storage | null): void {
+  if (!almacen) return;
+  try {
+    almacen.setItem(CLAVE_MODO, noQueridosCobrados ? '1' : '0');
+  } catch {
+    // Sin almacenamiento el modo dura lo que la sesión.
+  }
 }
