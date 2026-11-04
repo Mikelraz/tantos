@@ -16,18 +16,21 @@ const NOMBRE_RANGO: Record<Rango, string> = {
 function iconoPalo(doc: Document, palo: Palo): SVGElement {
   const formas: Record<Palo, () => SVGElement[]> = {
     0: () => [
-      svg(doc, 'circle', { cx: 10, cy: 10, r: 8, class: 'relleno' }),
-      svg(doc, 'circle', { cx: 10, cy: 10, r: 4.2, class: 'trazo' }),
+      svg(doc, 'circle', { cx: 10, cy: 10, r: 8.4, class: 'relleno' }),
+      svg(doc, 'circle', { cx: 10, cy: 10, r: 5.6, class: 'trazo' }),
+      svg(doc, 'circle', { cx: 10, cy: 10, r: 2, class: 'nudo' }),
     ],
     1: () => [
       svg(doc, 'path', { d: 'M3.5 2.5h13c0 5.6-2.6 8.6-6.5 8.6S3.5 8.1 3.5 2.5z', class: 'relleno' }),
+      svg(doc, 'rect', { x: 3.5, y: 2.5, width: 13, height: 1.6, class: 'nudo' }),
       svg(doc, 'rect', { x: 9, y: 10.5, width: 2, height: 4.5, class: 'relleno' }),
       svg(doc, 'rect', { x: 5.5, y: 15, width: 9, height: 2.6, rx: 1, class: 'relleno' }),
     ],
     2: () => [
-      svg(doc, 'path', { d: 'M10 1l2.2 3v8.6H7.8V4z', class: 'relleno' }),
-      svg(doc, 'rect', { x: 4.5, y: 12.4, width: 11, height: 2.2, rx: 1, class: 'relleno' }),
-      svg(doc, 'rect', { x: 9, y: 14.6, width: 2, height: 4.4, rx: 0.8, class: 'relleno' }),
+      svg(doc, 'path', { d: 'M10 .8l2 2.8v9H8v-9z', class: 'relleno' }),
+      svg(doc, 'path', { d: 'M3.6 12.2h12.8c0 1.3-1 2.2-2.2 2.2H5.8c-1.2 0-2.2-.9-2.2-2.2z', class: 'nudo' }),
+      svg(doc, 'rect', { x: 9, y: 14.4, width: 2, height: 3.4, class: 'relleno' }),
+      svg(doc, 'circle', { cx: 10, cy: 18.4, r: 1.4, class: 'nudo' }),
     ],
     3: () => [
       svg(doc, 'path', {
@@ -36,6 +39,7 @@ function iconoPalo(doc: Document, palo: Palo): SVGElement {
       }),
       svg(doc, 'circle', { cx: 8.6, cy: 7.5, r: 1, class: 'nudo' }),
       svg(doc, 'circle', { cx: 11, cy: 11.5, r: 1, class: 'nudo' }),
+      svg(doc, 'circle', { cx: 9.4, cy: 15, r: 0.9, class: 'nudo' }),
     ],
   };
   return svg(
@@ -46,7 +50,38 @@ function iconoPalo(doc: Document, palo: Palo): SVGElement {
   );
 }
 
+/**
+ * Marco de la baraja española (viewBox 40×57). Sus cortes, las "pintas", dicen el palo:
+ * oros ninguno, copas uno, espadas dos y bastos tres, arriba y abajo.
+ */
+function marco(doc: Document, palo: Palo): SVGElement {
+  const [x0, x1, y0, y1, r] = [3, 37, 3, 54, 2.5];
+  const cortes = palo;
+  const hueco = 2.6;
+  const paso = 5.2;
+  // Tramos de un borde horizontal, de izquierda a derecha, dejando los huecos en el centro.
+  const tramos: Array<[number, number]> = [];
+  let desde = x0 + r;
+  for (let i = 0; i < cortes; i++) {
+    const centro = 20 + (i - (cortes - 1) / 2) * paso;
+    tramos.push([desde, centro - hueco / 2]);
+    desde = centro + hueco / 2;
+  }
+  tramos.push([desde, x1 - r]);
+  const horizontales = (y: number) => tramos.map(([a, b]) => `M${a} ${y}H${b}`).join('');
+  const lados =
+    `M${x0 + r} ${y0}A${r} ${r} 0 0 0 ${x0} ${y0 + r}V${y1 - r}A${r} ${r} 0 0 0 ${x0 + r} ${y1}` +
+    `M${x1 - r} ${y0}A${r} ${r} 0 0 1 ${x1} ${y0 + r}V${y1 - r}A${r} ${r} 0 0 1 ${x1 - r} ${y1}`;
+  return svg(
+    doc,
+    'svg',
+    { viewBox: '0 0 40 57', preserveAspectRatio: 'none', class: 'marco', 'aria-hidden': 'true', focusable: 'false' },
+    svg(doc, 'path', { d: horizontales(y0) + horizontales(y1) + lados }),
+  );
+}
+
 function dibujarCarta(doc: Document, c: Carta): HTMLElement {
+  const numero = simbolo(c);
   return h(
     doc,
     'span',
@@ -55,8 +90,10 @@ function dibujarCarta(doc: Document, c: Carta): HTMLElement {
       role: 'img',
       'aria-label': `${NOMBRE_RANGO[c.rango]} de ${NOMBRE_PALO[c.palo]}`,
     },
-    h(doc, 'span', { class: 'simbolo' }, simbolo(c)),
+    marco(doc, c.palo),
+    h(doc, 'span', { class: 'indice arriba', 'aria-hidden': 'true' }, numero),
     iconoPalo(doc, c.palo),
+    h(doc, 'span', { class: 'indice abajo', 'aria-hidden': 'true' }, numero),
   );
 }
 

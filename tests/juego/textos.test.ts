@@ -79,14 +79,14 @@ describe('lineaLance', () => {
 
 describe('explicarLance', () => {
   it('explica el ejemplo de los bocetos', () => {
-    expect(explicarLance(g, mano)).toBe('RR75 gana a RCS1 · envite querido 2');
+    expect(explicarLance(g, mano)).toBe('12 12 7 5 gana a 12 11 10 1 · envite querido 2');
     expect(explicarLance(c, mano)).toBe('no quiero → 1');
     expect(explicarLance(p, mano)).toBe('solo Nosotros · pareja de reyes 1 + pareja de sietes 1');
     expect(explicarLance(j, mano)).toBe('31 gana a 32 · envite querido 2 · 31 vale 3');
   });
   it('la chica se compara de menor a mayor', () => {
     const m: ManoJugada = { ...mano, lances: [pasan('grande'), pasan('chica'), l('pares'), l('juego', env(0, 2), quiero(3))] };
-    expect(explicarLance(contarMano(m).lances[1] as typeof g, m)).toBe('14SC gana a 477S · en paso 1');
+    expect(explicarLance(contarMano(m).lances[1] as typeof g, m)).toBe('1 4 10 11 gana a 4 7 7 10 · en paso 1');
   });
   it('los pares usan nombres de rango: medias, duples mixtos y cuatro iguales', () => {
     const pares = (cartas: string[], cuarto: LanceJugado['lance'], todos: boolean): string => {
@@ -154,7 +154,8 @@ describe('mesa', () => {
   it('coloca los asientos en sentido antihorario', () => {
     expect([0, 1, 2, 3].map(posicionEnPantalla)).toEqual(['abajo', 'derecha', 'arriba', 'izquierda']);
     expect([0, 1, 2, 3].map(etiquetaPuesto)).toEqual(['Tú', 'Rival', 'Compañero', 'Rival']);
-    expect(simbolo({ rango: 10, palo: 0 })).toBe('S');
+    expect(simbolo({ rango: 10, palo: 0 })).toBe('10');
+    expect(simbolo({ rango: 12, palo: 3 })).toBe('12');
   });
   it('cartasDecisivas une ganador y tantos sin repetir', () => {
     expect(cartasDecisivas(j)).toEqual([3]);

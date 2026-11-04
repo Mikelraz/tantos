@@ -10,11 +10,15 @@
   --tecla: rgba(255, 255, 255, 0.13);
   --tecla-activa: rgba(255, 255, 255, 0.28);
 
-  --carta: #fdfaf2;
-  --carta-texto: #1f1d1a;
-  --carta-borde: #d9d0ba;
-  --dorso: #8a2f24;
-  --dorso-2: #6d241b;
+  --carta: #fffbef;
+  --carta-2: #f3ead3;
+  --carta-borde: #c9bb98;
+  --dorso: #9b2d22;
+  --dorso-2: #6d1d16;
+  --tinta-oros: #8a5d05;
+  --tinta-copas: #a32a1c;
+  --tinta-espadas: #22508f;
+  --tinta-bastos: #2f5e22;
 
   --nos: #2f6fd6;
   --nos-fondo: rgba(47, 111, 214, 0.28);
@@ -36,7 +40,7 @@
   --palo-bastos: #3f7a2e;
   --palo-bastos-2: #24481a;
 
-  --carta-an: clamp(28px, 9vw, 40px);
+  --carta-an: clamp(26px, calc(9.5vw - 2px), 44px);
   --radio: 12px;
 
   color-scheme: dark;
@@ -53,9 +57,9 @@
     --tecla: rgba(255, 255, 255, 0.08);
     --tecla-activa: rgba(255, 255, 255, 0.2);
 
-    --carta: #e4ddcb;
-    --carta-texto: #181614;
-    --carta-borde: #b9ae94;
+    --carta: #ebe3cf;
+    --carta-2: #d8ccae;
+    --carta-borde: #ad9f7f;
 
     --nos: #3d72c9;
     --nos-fondo: rgba(61, 114, 201, 0.24);
@@ -294,31 +298,78 @@ tr:focus-visible {
   gap: 3px;
 }
 
+/* Naipe español clásico: papel marfil, marco con pintas, índices en las esquinas y el palo al centro. */
 .carta {
   position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
+  display: inline-block;
   width: var(--carta-an);
   height: calc(var(--carta-an) * 1.42);
-  border-radius: 5px;
-  background: var(--carta);
-  color: var(--carta-texto);
+  border-radius: calc(var(--carta-an) * 0.12);
+  background: linear-gradient(160deg, var(--carta) 0%, var(--carta-2) 100%);
+  color: var(--tinta);
   border: 1px solid var(--carta-borde);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
-.simbolo {
-  font-size: calc(var(--carta-an) * 0.5);
-  font-weight: 800;
+.marco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.85;
+}
+
+.marco path {
+  vector-effect: non-scaling-stroke;
+}
+
+.indice {
+  position: absolute;
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Noto Serif', 'Droid Serif', Georgia, serif;
+  font-size: calc(var(--carta-an) * 0.42);
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
   line-height: 1;
+  letter-spacing: -0.06em;
+  text-align: center;
+  min-width: 0.6em;
+}
+
+.indice.arriba {
+  top: 8%;
+  left: 11%;
+}
+
+.indice.abajo {
+  bottom: 8%;
+  right: 11%;
+  transform: rotate(180deg);
 }
 
 .palo {
-  width: calc(var(--carta-an) * 0.56);
-  height: calc(var(--carta-an) * 0.56);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--carta-an) * 0.38);
+  height: calc(var(--carta-an) * 0.38);
+  transform: translate(-50%, -50%);
+}
+
+.palo-0 {
+  --tinta: var(--tinta-oros);
+}
+.palo-1 {
+  --tinta: var(--tinta-copas);
+}
+.palo-2 {
+  --tinta: var(--tinta-espadas);
+}
+.palo-3 {
+  --tinta: var(--tinta-bastos);
 }
 
 .palo-0 .relleno {
@@ -327,31 +378,28 @@ tr:focus-visible {
 .palo-0 .trazo {
   fill: none;
   stroke: var(--palo-oros-2);
-  stroke-width: 1.6;
+  stroke-width: 1.2;
 }
-.palo-0 .simbolo {
-  color: #8a5d05;
+.palo-0 .nudo {
+  fill: var(--palo-oros-2);
 }
 .palo-1 .relleno {
   fill: var(--palo-copas);
 }
-.palo-1 .simbolo {
-  color: #a32a1c;
+.palo-1 .nudo {
+  fill: var(--palo-oros);
 }
 .palo-2 .relleno {
   fill: var(--palo-espadas);
 }
-.palo-2 .simbolo {
-  color: #22508f;
+.palo-2 .nudo {
+  fill: var(--palo-oros-2);
 }
 .palo-3 .relleno {
   fill: var(--palo-bastos);
 }
 .palo-3 .nudo {
   fill: var(--palo-bastos-2);
-}
-.palo-3 .simbolo {
-  color: #2f5e22;
 }
 
 .etiqueta {
@@ -396,8 +444,12 @@ tr:focus-visible {
 
 /* Cartas tapadas durante la pausa. */
 .mesa.tapada .carta {
-  background: repeating-linear-gradient(45deg, var(--dorso) 0 4px, var(--dorso-2) 4px 8px);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.14) 3px 4px),
+    repeating-linear-gradient(-45deg, transparent 0 3px, rgba(255, 255, 255, 0.14) 3px 4px),
+    linear-gradient(var(--dorso), var(--dorso-2));
   border-color: var(--dorso-2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 2px var(--carta), inset 0 0 0 3px var(--dorso-2);
 }
 .mesa.tapada .carta > * {
   visibility: hidden;

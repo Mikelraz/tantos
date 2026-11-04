@@ -1,5 +1,5 @@
 /** Textos de la mesa: nombres, líneas de envite y explicación de cada cobro. */
-import { totalJugada, type Carta, type Jugada, type Rango } from '../reglas/cartas';
+import { totalJugada, type Carta, type Jugada } from '../reglas/cartas';
 import type { CobroLance, LanceJugado, ManoJugada } from '../reglas/contar';
 import {
   claveLance,
@@ -41,12 +41,9 @@ export function etiquetaPuesto(puesto: number): string {
   return ETIQUETAS[puesto] as string;
 }
 
-const SIMBOLO_RANGO: Record<Rango, string> = {
-  1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 10: 'S', 11: 'C', 12: 'R',
-};
-
+/** Cada carta se nombra por su número, también las figuras (sota 10, caballo 11, rey 12). */
 export function simbolo(c: Carta): string {
-  return SIMBOLO_RANGO[c.rango];
+  return String(c.rango);
 }
 
 /** Nombre en plural de una fuerza ordinal (As 1 ... Rey 10), para explicar los pares. */
@@ -100,9 +97,9 @@ function describirPares(p: JugadaPares): string {
 function describirJugada(lance: Lance, j: Jugada): string {
   switch (lance) {
     case 'grande':
-      return [...j].sort((a, b) => ordenFuerza(b) - ordenFuerza(a)).map(simbolo).join('');
+      return [...j].sort((a, b) => ordenFuerza(b) - ordenFuerza(a)).map(simbolo).join(' ');
     case 'chica':
-      return [...j].sort((a, b) => ordenFuerza(a) - ordenFuerza(b)).map(simbolo).join('');
+      return [...j].sort((a, b) => ordenFuerza(a) - ordenFuerza(b)).map(simbolo).join(' ');
     case 'pares':
       return describirPares(clavePares(j) as JugadaPares);
     case 'juego':

@@ -58,7 +58,7 @@ Decisiones del diseñador (el usuario no las ha pedido; se pueden cambiar):
   será **público** (Pages gratis lo exige salvo con GitHub Pro); no contiene nada sensible.
 - Todo el texto de la interfaz, el código de dominio y los comentarios en castellano, con el
   vocabulario del mus (`mano`, `lance`, `envite`, `pareja`, `tantos`…), igual que ordago.
-- Las cartas se dibujan con CSS/SVG propio: número/figura y palo (oros, copas, espadas, bastos).
+- Las cartas se dibujan con CSS/SVG propio, al estilo del naipe español: número en las esquinas (también las figuras: sota 10, caballo 11, rey 12), palo al centro y marco con las pintas de su palo.
   El palo no influye en nada; está por realismo. Sin imágenes de barajas comerciales.
 
 ## Reglas
